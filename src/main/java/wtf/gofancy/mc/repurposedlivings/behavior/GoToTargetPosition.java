@@ -24,7 +24,7 @@ public class GoToTargetPosition<E extends Mob> extends Behavior<E> {
       BehaviorUtils.setWalkAndLookTargetMemories(mob, blockpos, this.speedModifier, 0);
    }
 
-   private BlockPos getTargetLocation(Mob p_217249_) {
-      return p_217249_.getBrain().getMemory(this.locationMemory).get();
+   private BlockPos getTargetLocation(Mob mob) {
+      return mob.getBrain().getMemory(this.locationMemory).get();
    }
 }

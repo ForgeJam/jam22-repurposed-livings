@@ -19,6 +19,7 @@ public final class ModSetup {
     
     public static final RegistryObject<Item> ALLAY_MAP = ITEMS.register("allay_map", AllayMapItem::new);
     
+    public static final RegistryObject<MemoryModuleType<BlockPos>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<BlockPos>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.empty()));
     
     public static final RegistryObject<Activity> ALLAY_PICK_UP_ITEM = ACTIVITIES.register("allay_pick_up_item", () -> new Activity("allay_pick_up_item"));

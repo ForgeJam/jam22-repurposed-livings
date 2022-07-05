@@ -15,6 +15,8 @@ java {
 minecraft {
     mappings("parchment", "1.18.2-2022.07.03-1.19")
     
+    accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
+    
     runs {
         create("client") {
             workingDirectory = file("run").canonicalPath
