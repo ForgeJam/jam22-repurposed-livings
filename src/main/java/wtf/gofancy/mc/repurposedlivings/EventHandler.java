@@ -16,6 +16,7 @@ import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.EmptyMapItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -25,6 +26,7 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import wtf.gofancy.mc.repurposedlivings.behavior.GoToTargetPosition;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
 
@@ -43,14 +45,29 @@ public class EventHandler {
         Block block = level.getBlockState(pos).getBlock();
         Player player = event.getPlayer();
         
-        if (player.isShiftKeyDown() && block instanceof ChestBlock && event.getItemStack().getItem() instanceof EmptyMapItem) {
-            CompoundTag tag = AllayMapItem.createTarget(pos, pos);
-            ItemStack stack = new ItemStack(ModSetup.ALLAY_MAP.get());
-            stack.setTag(tag);
+        if (!player.level.isClientSide && player.isShiftKeyDown() && block instanceof ChestBlock) {
+            ItemStack stack = event.getItemStack();
+            Item item = stack.getItem();
             
-            player.setItemInHand(event.getHand(), stack);
-            event.setCancellationResult(InteractionResult.CONSUME);
-            event.setCanceled(true);
+            if (item instanceof EmptyMapItem) {
+                CompoundTag tag = AllayMapItem.createTargetFrom(pos);
+                ItemStack allayStack = new ItemStack(ModSetup.ALLAY_MAP.get());
+                allayStack.setTag(tag);
+
+                player.setItemInHand(event.getHand(), allayStack);
+                event.setCancellationResult(InteractionResult.CONSUME);
+                event.setCanceled(true);
+            }
+            else if (item instanceof AllayMapItem) {
+                CompoundTag tag = stack.getTag();
+                
+                if (tag.contains("from") && !tag.contains("to")) {
+                    tag.put("to", NbtUtils.writeBlockPos(pos));
+                    
+                    event.setCancellationResult(InteractionResult.SUCCESS);
+                    event.setCanceled(true);
+                }
+            }
         }
     }
     
@@ -61,6 +78,7 @@ public class EventHandler {
         if (entity instanceof Allay allay) {
             Brain<Allay> brain = allay.getBrain();
             brain.memories.put(ModSetup.ALLAY_SOURCE_TARET.get(), Optional.empty());
+            brain.memories.put(ModSetup.ALLAY_DELIVERY_TARET.get(), Optional.empty());
 
             Set<Pair<MemoryModuleType<?>, MemoryStatus>> requirements = Stream.concat(
                 brain.activityRequirements.get(Activity.IDLE).stream(),
@@ -69,9 +87,12 @@ public class EventHandler {
             brain.activityRequirements.put(Activity.IDLE, requirements);
             
             brain.addActivity(
-                ModSetup.ALLAY_PICK_UP_ITEM.get(),
+                ModSetup.ALLAY_TRANSFER_ITEM.get(),
                 10,
-                ImmutableList.of(new GoToTargetPosition<>(ModSetup.ALLAY_SOURCE_TARET.get(), 1.75F))
+                ImmutableList.of(
+                    new GoToTargetPosition<>(ModSetup.ALLAY_SOURCE_TARET.get(), 1.75F, e -> e.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()),
+                    new GoToTargetPosition<>(ModSetup.ALLAY_DELIVERY_TARET.get(), 1.75F, Allay::hasItemInHand)
+                )
             );
         }
     }
@@ -82,10 +103,15 @@ public class EventHandler {
         Entity target = event.getTarget();
         
         if (target instanceof Allay allay && stack.getItem() instanceof AllayMapItem) {
-            BlockPos targetPos = NbtUtils.readBlockPos(stack.getTag().getCompound("from"));
-            allay.getBrain().setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), targetPos.above());
+            Brain<Allay> brain = allay.getBrain();
+            CompoundTag tag = stack.getTag();
+            BlockPos fromPos = NbtUtils.readBlockPos(tag.getCompound("from"));
+            brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), fromPos.above());
             
-            allay.getBrain().setActiveActivityIfPossible(ModSetup.ALLAY_PICK_UP_ITEM.get());
+            BlockPos toPos = NbtUtils.readBlockPos(tag.getCompound("to"));
+            brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), toPos.above());
+            
+            brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEM.get());
             event.setCanceled(true);
         }
     }
@@ -94,16 +120,36 @@ public class EventHandler {
     public void onLivingUpdate(LivingEvent.LivingUpdateEvent event) {
         LivingEntity entity = event.getEntityLiving();
         if (entity instanceof Allay) {
-            // TODO Animate open chest?
-            entity.getBrain().getMemory(ModSetup.ALLAY_SOURCE_TARET.get())
-                .filter(pos -> entity.blockPosition().closerThan(pos, 0.5))
-                .map(pos -> entity.level.getBlockEntity(pos.below()))
-                .flatMap(be -> be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).resolve())
-                .flatMap(itemHandler -> IntStream.range(0, itemHandler.getSlots())
-                    .mapToObj(i -> itemHandler.extractItem(i, Integer.MAX_VALUE, false))
-                    .filter(stack -> !stack.isEmpty())
-                    .findFirst())
-                .ifPresent(stack -> entity.setItemInHand(InteractionHand.MAIN_HAND, stack));
+            // TODO Find free spot around target, don't rely on above block
+            ItemStack stackInHand = entity.getItemInHand(InteractionHand.MAIN_HAND);
+            if (stackInHand.isEmpty()) {
+                getTargetItemHandler(entity, ModSetup.ALLAY_SOURCE_TARET.get())
+                    .flatMap(itemHandler -> IntStream.range(0, itemHandler.getSlots())
+                        .mapToObj(i -> itemHandler.extractItem(i, Integer.MAX_VALUE, false))
+                        .filter(stack -> !stack.isEmpty())
+                        .findFirst())
+                    .ifPresent(stack -> entity.setItemInHand(InteractionHand.MAIN_HAND, stack));
+            } 
+            else {
+                getTargetItemHandler(entity, ModSetup.ALLAY_DELIVERY_TARET.get())
+                    .map(itemHandler -> insertStack(itemHandler, stackInHand))
+                    .ifPresent(stack -> entity.setItemInHand(InteractionHand.MAIN_HAND, stack));
+            }
         }
+    }
+    
+    private Optional<IItemHandler> getTargetItemHandler(LivingEntity entity, MemoryModuleType<BlockPos> memory) {
+        return entity.getBrain().getMemory(memory)
+            .filter(pos -> entity.blockPosition().closerThan(pos, 0.5))
+            .map(pos -> entity.level.getBlockEntity(pos.below()))
+            .flatMap(be -> be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).resolve());
+    }
+    
+    private ItemStack insertStack(IItemHandler handler, ItemStack stack) {
+        ItemStack inserted = stack;
+        for (int i = 0; i < handler.getSlots(); i++) {
+            inserted = handler.insertItem(i, inserted, false);
+        }
+        return inserted;
     }
 }

@@ -14,17 +14,15 @@ public class HijackItem extends Item {
 
     public static final Logger logger = LogUtils.getLogger();
 
-    public HijackItem(Properties p_41383_) {
-        super(p_41383_);
+    public HijackItem(Properties properties) {
+        super(properties);
     }
 
     @Override
     public @NotNull InteractionResult interactLivingEntity(@NotNull ItemStack stack, @NotNull Player player, @NotNull LivingEntity entity, @NotNull InteractionHand hand) {
         if (!player.level.isClientSide) {
             logger.info("hijacking entity {}", entity);
-
         }
-
         return super.interactLivingEntity(stack, player, entity, hand);
     }
 }
