@@ -2,10 +2,12 @@ package wtf.gofancy.mc.repurposedlivings;
 
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
+import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 
 @Mod(RepurposedLivings.MODID)
 public class RepurposedLivings {
@@ -14,8 +16,13 @@ public class RepurposedLivings {
 
     public RepurposedLivings() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(this::onEntityAttributeCreation);
         ModSetup.register(bus);
         
         MinecraftForge.EVENT_BUS.register(new EventHandler());
+    }
+    
+    public void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
+        event.put(ModSetup.HIJACKED_ALLAY_ENTITY.get(), HijackedAllay.createAttributes().build());
     }
 }

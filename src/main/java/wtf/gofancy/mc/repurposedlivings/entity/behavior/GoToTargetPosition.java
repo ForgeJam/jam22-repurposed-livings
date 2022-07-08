@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.behavior;
+package wtf.gofancy.mc.repurposedlivings.entity.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;

@@ -27,8 +27,10 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import wtf.gofancy.mc.repurposedlivings.behavior.GoToTargetPosition;
+import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.entity.behavior.GoToTargetPosition;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
+import wtf.gofancy.mc.repurposedlivings.item.MindControlDeviceItem;
 
 import java.util.Optional;
 import java.util.Set;
@@ -87,7 +89,7 @@ public class EventHandler {
             brain.activityRequirements.put(Activity.IDLE, requirements);
             
             brain.addActivity(
-                ModSetup.ALLAY_TRANSFER_ITEM.get(),
+                ModSetup.ALLAY_TRANSFER_ITEMS.get(),
                 10,
                 ImmutableList.of(
                     new GoToTargetPosition<>(ModSetup.ALLAY_SOURCE_TARET.get(), 1.75F, e -> e.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()),
@@ -102,21 +104,33 @@ public class EventHandler {
         ItemStack stack = event.getItemStack();
         Entity target = event.getTarget();
         
-        if (target instanceof Allay allay && stack.getItem() instanceof AllayMapItem) {
-            Brain<Allay> brain = allay.getBrain();
-            CompoundTag tag = stack.getTag();
-            BlockPos fromPos = NbtUtils.readBlockPos(tag.getCompound("from"));
-            brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), fromPos.above());
-            
-            BlockPos toPos = NbtUtils.readBlockPos(tag.getCompound("to"));
-            brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), toPos.above());
-            
-            brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEM.get());
-            event.setCanceled(true);
+        if (target instanceof Allay allay) {
+            Item item = stack.getItem();
+            if (item instanceof MindControlDeviceItem) {
+                CompoundTag allayTag = allay.saveWithoutId(new CompoundTag());
+                allay.remove(Entity.RemovalReason.DISCARDED);
+                HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), allay.level);
+                hijackedAllay.load(allayTag);
+                allay.level.addFreshEntity(hijackedAllay);
+                
+                if (!event.getPlayer().isCreative()) stack.shrink(1);
+            }
+            else if (item instanceof AllayMapItem) {
+                Brain<Allay> brain = allay.getBrain();
+                CompoundTag tag = stack.getTag();
+                BlockPos fromPos = NbtUtils.readBlockPos(tag.getCompound("from"));
+                brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), fromPos.above());
+
+                BlockPos toPos = NbtUtils.readBlockPos(tag.getCompound("to"));
+                brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), toPos.above());
+
+                brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
+                event.setCanceled(true);   
+            }
         }
     }
     
-    @SubscribeEvent
+//    @SubscribeEvent
     public void onLivingUpdate(LivingEvent.LivingUpdateEvent event) {
         LivingEntity entity = event.getEntityLiving();
         if (entity instanceof Allay) {
