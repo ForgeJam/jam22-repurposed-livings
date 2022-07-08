@@ -3,10 +3,11 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EmptyMapItem;
 import net.minecraft.world.item.Item;
@@ -29,7 +30,7 @@ public class EventHandler {
         Block block = level.getBlockState(pos).getBlock();
         Player player = event.getPlayer();
         
-        if (!player.level.isClientSide && player.isShiftKeyDown() && block instanceof ChestBlock) {
+        if (!player.level.isClientSide && player.isShiftKeyDown() && block instanceof ChestBlock) { // TODO Remove chest hardcoding
             ItemStack stack = event.getItemStack();
             Item item = stack.getItem();
             
@@ -60,30 +61,26 @@ public class EventHandler {
         ItemStack stack = event.getItemStack();
         Entity target = event.getTarget();
         
-        if (target instanceof Allay allay) {
-            Item item = stack.getItem();
-            if (item instanceof MindControlDeviceItem) {
-                CompoundTag allayTag = allay.saveWithoutId(new CompoundTag());
-                allay.remove(Entity.RemovalReason.DISCARDED);
-                HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), allay.level);
-                hijackedAllay.load(allayTag);
-                allay.level.addFreshEntity(hijackedAllay);
+        if (target instanceof Allay allay && stack.getItem() instanceof MindControlDeviceItem) { // TODO Sound
+            for (InteractionHand hand : InteractionHand.values()) {
+                ItemStack stackInHand = allay.getItemInHand(hand);
+                ItemEntity item = new ItemEntity(allay.level, allay.getX(), allay.getY(), allay.getZ(), stackInHand);
+                item.setDeltaMovement(0, 0, 0);
+                allay.level.addFreshEntity(item);
                 
-                stack.shrink(1);
-                event.setCancellationResult(InteractionResult.CONSUME);
-                event.setCanceled(true);
+                allay.setItemInHand(hand, ItemStack.EMPTY);
             }
-            else if (item instanceof AllayMapItem) {
-                Brain<Allay> brain = allay.getBrain();
-                CompoundTag tag = stack.getTag();
-                BlockPos fromPos = NbtUtils.readBlockPos(tag.getCompound("from"));
-                brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), fromPos.above());
-
-                BlockPos toPos = NbtUtils.readBlockPos(tag.getCompound("to"));
-                brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), toPos.above());
-
-                event.setCanceled(true);   
-            }
+            
+            CompoundTag allayTag = allay.saveWithoutId(new CompoundTag());
+            HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), allay.level);
+            hijackedAllay.load(allayTag);
+            
+            allay.remove(Entity.RemovalReason.DISCARDED);
+            allay.level.addFreshEntity(hijackedAllay);
+//            stack.shrink(1);
+            
+            event.setCancellationResult(InteractionResult.CONSUME);
+            event.setCanceled(true);
         }
     }
 }
