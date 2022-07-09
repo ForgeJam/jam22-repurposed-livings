@@ -3,6 +3,7 @@ package wtf.gofancy.mc.repurposedlivings.entity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -26,9 +27,19 @@ public class HijackedAllay extends Allay {
         MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS,
         MemoryModuleType.IS_PANICKING, ModSetup.ALLAY_SOURCE_TARET.get(), ModSetup.ALLAY_DELIVERY_TARET.get()
     );
+    
+    private final NonNullList<ItemStack> equipmentSlots = NonNullList.withSize(4, ItemStack.EMPTY);
 
     public HijackedAllay(EntityType<? extends HijackedAllay> type, Level level) {
         super(type, level);
+    }
+
+    public void setEquipmentSlot(AllayEquipment slot, ItemStack stack) {
+        this.verifyEquippedItem(stack);
+        int index = slot.ordinal();
+        if (!stack.isEmpty() && !ItemStack.isSameIgnoreDurability(stack, this.equipmentSlots.set(index, stack))) {
+            this.playEquipSound(stack);
+        }
     }
 
     @Override
@@ -69,10 +80,16 @@ public class HijackedAllay extends Allay {
         }
     }
 
+    @Override
+    public void dropEquipment() {
+        super.dropEquipment();
+        this.equipmentSlots.forEach(this::spawnAtLocation);
+    }
+
     private Optional<IItemHandler> getTargetItemHandler(MemoryModuleType<BlockPos> memory) {
         return this.brain.getMemory(memory)
             .filter(pos -> this.blockPosition().closerThan(pos, 0.75))
-            .map(pos -> this.level.getBlockEntity(pos.below()))
+            .map(pos -> this.level.getBlockEntity(pos.below())) // TODO Fix target side hardcoding
             .flatMap(be -> be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).resolve());
     }
 

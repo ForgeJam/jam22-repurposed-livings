@@ -2,6 +2,7 @@ package wtf.gofancy.mc.repurposedlivings.item;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 
 import java.util.List;
 
@@ -27,10 +29,12 @@ public class AllayMapItem extends Item {
         super(new Properties().stacksTo(1));
     }
     
-    public static CompoundTag createTargetFrom(BlockPos from) {
-        CompoundTag tag = new CompoundTag();
-        tag.put("from", NbtUtils.writeBlockPos(from));
-        return tag;
+    public static ItemStack createFromDraft(ItemStack draft, BlockPos destPos, Direction destSide) {
+        CompoundTag tag = draft.getTag();
+        tag.put("to", ModUtil.createTargetTag(destPos, destSide));
+        ItemStack stack = new ItemStack(ModSetup.ALLAY_MAP.get(), 1);
+        stack.setTag(tag);
+        return stack;
     }
 
     @Override
@@ -39,11 +43,15 @@ public class AllayMapItem extends Item {
             Brain<Allay> brain = allay.getBrain();
             CompoundTag tag = stack.getTag();
             // TODO Find free space around target
-            BlockPos fromPos = NbtUtils.readBlockPos(tag.getCompound("from"));
-            brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), fromPos.above());
+            CompoundTag from = tag.getCompound("from");
+            BlockPos fromPos = NbtUtils.readBlockPos(from.getCompound("pos"));
+            Direction fromSide = Direction.from3DDataValue(from.getInt("side"));
+            brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), fromPos.relative(fromSide));
             
-            BlockPos toPos = NbtUtils.readBlockPos(tag.getCompound("to"));
-            brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), toPos.above());
+            CompoundTag to = tag.getCompound("to");
+            BlockPos toPos = NbtUtils.readBlockPos(to.getCompound("pos"));
+            Direction toSide = Direction.from3DDataValue(to.getInt("side"));
+            brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), toPos.relative(toSide));
             
             return InteractionResult.SUCCESS;
         }
@@ -54,14 +62,18 @@ public class AllayMapItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
         
-        CompoundTag tag = stack.getTag();
-        if (tag.contains("from")) {
-            BlockPos from = NbtUtils.readBlockPos(tag.getCompound("from"));
-            tooltipComponents.add(Component.literal("From: " + from).withStyle(ChatFormatting.DARK_GRAY));
+        CompoundTag tag = stack.getOrCreateTag();
+        if (tag.contains("from") && tag.contains("to")) {
+            CompoundTag from = tag.getCompound("from");
+            BlockPos fromPos = NbtUtils.readBlockPos(from.getCompound("pos"));
+            Direction fromSide = Direction.from3DDataValue(from.getInt("side"));
+            tooltipComponents.add(Component.literal("From: " + fromPos + ", " + fromSide).withStyle(ChatFormatting.DARK_GRAY));
+            
+            CompoundTag to = tag.getCompound("to");
+            BlockPos toPos = NbtUtils.readBlockPos(to.getCompound("pos"));
+            Direction toSide = Direction.from3DDataValue(to.getInt("side"));
+            tooltipComponents.add(Component.literal("To: " + toPos + ", " + toSide).withStyle(ChatFormatting.DARK_GRAY));
         }
-        if (tag.contains("to")) {
-            BlockPos to = NbtUtils.readBlockPos(tag.getCompound("to"));
-            tooltipComponents.add(Component.literal("To: " + to).withStyle(ChatFormatting.DARK_GRAY));
-        }
+        else tooltipComponents.add(Component.literal("Invalid").withStyle(ChatFormatting.DARK_GRAY));
     }
 }

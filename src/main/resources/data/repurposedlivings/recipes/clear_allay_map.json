@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    [
+      {
+        "item": "repurposedlivings:allay_map"
+      },
+      {
+        "item": "repurposedlivings:allay_map_draft"
+      }
+    ]
+  ],
+  "result": {
+    "item": "minecraft:map"
+  }
+}

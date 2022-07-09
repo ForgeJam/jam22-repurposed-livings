@@ -16,8 +16,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.item.AllayMapDraftItem;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
-import wtf.gofancy.mc.repurposedlivings.item.MindControlDeviceItem;
 
 import java.util.Optional;
 
@@ -37,7 +37,8 @@ public final class ModSetup {
     private static final Item.Properties ITEM_PROPERTIES = new Item.Properties().tab(REPURPOSED_LIVINGS_TAB);
     
     public static final RegistryObject<Item> ALLAY_MAP = ITEMS.register("allay_map", AllayMapItem::new);
-    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDeviceItem(ITEM_PROPERTIES));
+    public static final RegistryObject<Item> ALLAY_MAP_DRAFT = ITEMS.register("allay_map_draft", AllayMapDraftItem::new);
+    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new Item(ITEM_PROPERTIES.stacksTo(1)));
     
     public static final RegistryObject<MemoryModuleType<BlockPos>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
     public static final RegistryObject<MemoryModuleType<BlockPos>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));

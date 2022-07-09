@@ -2,6 +2,6 @@
     "parent": "item/generated",
     "textures": {
         "layer0": "item/map",
-        "layer1": "repurposedlivings:item/allay_map_overlay"
+        "layer1": "repurposedlivings:item/allay_map"
     }
 }
