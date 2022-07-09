@@ -9,16 +9,19 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class GoToTargetPosition<E extends Mob> extends Behavior<E> {
-   private final MemoryModuleType<BlockPos> locationMemory;
+public class GoToTargetPosition<E extends Mob, M> extends Behavior<E> {
+   private final MemoryModuleType<M> locationMemory;
+   private final Function<M, BlockPos> posGetter;
    private final float speedModifier;
    private final Predicate<E> condition;
 
-   public GoToTargetPosition(MemoryModuleType<BlockPos> locationMemory, float speedModifier, Predicate<E> condition) {
+   public GoToTargetPosition(MemoryModuleType<M> locationMemory, Function<M, BlockPos> posGetter, float speedModifier, Predicate<E> condition) {
       super(ImmutableMap.of(locationMemory, MemoryStatus.VALUE_PRESENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED));
       this.locationMemory = locationMemory;
+      this.posGetter = posGetter;
       this.speedModifier = speedModifier;
       this.condition = condition;
    }
@@ -35,6 +38,7 @@ public class GoToTargetPosition<E extends Mob> extends Behavior<E> {
    }
 
    private BlockPos getTargetLocation(Mob mob) {
-      return mob.getBrain().getMemory(this.locationMemory).get();
+      M memory = mob.getBrain().getMemory(this.locationMemory).get();
+      return this.posGetter.apply(memory);
    }
 }

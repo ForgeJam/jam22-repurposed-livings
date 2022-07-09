@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -13,18 +14,22 @@ import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
+import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
 import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class HijackedAllay extends Allay {
+    public static final double PICKUP_RANGE = 0.75;
+    // TODO Cleanup
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
         MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.WALK_TARGET,
         MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.HURT_BY, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER,
-        MemoryModuleType.LIKED_NOTEBLOCK_POSITION, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS,
         MemoryModuleType.IS_PANICKING, ModSetup.ALLAY_SOURCE_TARET.get(), ModSetup.ALLAY_DELIVERY_TARET.get()
     );
     
@@ -54,6 +59,11 @@ public class HijackedAllay extends Allay {
 
     @Override
     public boolean wantsToPickUp(ItemStack stack) {
+        return false;
+    }
+    
+    @Override
+    public boolean shouldListen(ServerLevel level, GameEventListener listener, BlockPos pos, GameEvent event, GameEvent.Context context) {
         return false;
     }
 
@@ -86,10 +96,11 @@ public class HijackedAllay extends Allay {
         this.equipmentSlots.forEach(this::spawnAtLocation);
     }
 
-    private Optional<IItemHandler> getTargetItemHandler(MemoryModuleType<BlockPos> memory) {
+    private Optional<IItemHandler> getTargetItemHandler(MemoryModuleType<ItemTarget> memory) {
         return this.brain.getMemory(memory)
-            .filter(pos -> this.blockPosition().closerThan(pos, 0.75))
-            .map(pos -> this.level.getBlockEntity(pos.below())) // TODO Fix target side hardcoding
+            .map(ItemTarget::pos)
+            .filter(pos -> this.blockPosition().closerThan(pos, PICKUP_RANGE))
+            .map(pos -> this.level.getBlockEntity(pos))
             .flatMap(be -> be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).resolve());
     }
 

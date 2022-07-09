@@ -1,6 +1,5 @@
 package wtf.gofancy.mc.repurposedlivings;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
@@ -10,7 +9,6 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -18,6 +16,7 @@ import net.minecraftforge.registries.RegistryObject;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapDraftItem;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
+import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
 import java.util.Optional;
 
@@ -31,7 +30,7 @@ public final class ModSetup {
     public static final CreativeModeTab REPURPOSED_LIVINGS_TAB = new CreativeModeTab(RepurposedLivings.MODID) {
         @Override
         public ItemStack makeIcon() {
-            return new ItemStack(Items.APPLE);
+            return new ItemStack(ALLAY_MAP.get());
         }
     };
     private static final Item.Properties ITEM_PROPERTIES = new Item.Properties().tab(REPURPOSED_LIVINGS_TAB);
@@ -40,8 +39,8 @@ public final class ModSetup {
     public static final RegistryObject<Item> ALLAY_MAP_DRAFT = ITEMS.register("allay_map_draft", AllayMapDraftItem::new);
     public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new Item(ITEM_PROPERTIES.stacksTo(1)));
     
-    public static final RegistryObject<MemoryModuleType<BlockPos>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
-    public static final RegistryObject<MemoryModuleType<BlockPos>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC)));
+    public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
+    public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
     
     public static final RegistryObject<Activity> ALLAY_TRANSFER_ITEMS = ACTIVITIES.register("allay_transfer_items", () -> new Activity("allay_transfer_items"));
     

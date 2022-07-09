@@ -4,7 +4,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -19,6 +18,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 
 import java.util.List;
@@ -30,8 +30,11 @@ public class AllayMapItem extends Item {
     }
     
     public static ItemStack createFromDraft(ItemStack draft, BlockPos destPos, Direction destSide) {
+        BlockPos fromPos = ItemTarget.fromNbt(draft.getTag().get("from")).getRelativePos();
+        if (destPos.relative(destSide).closerThan(fromPos, 1)) return ItemStack.EMPTY;
+        
         CompoundTag tag = draft.getTag();
-        tag.put("to", ModUtil.createTargetTag(destPos, destSide));
+        tag.put("to", new ItemTarget(destPos, destSide).serializeNbt());
         ItemStack stack = new ItemStack(ModSetup.ALLAY_MAP.get(), 1);
         stack.setTag(tag);
         return stack;
@@ -42,16 +45,11 @@ public class AllayMapItem extends Item {
         if (interactionTarget instanceof HijackedAllay allay) {
             Brain<Allay> brain = allay.getBrain();
             CompoundTag tag = stack.getTag();
-            CompoundTag from = tag.getCompound("from");
-            BlockPos fromPos = NbtUtils.readBlockPos(from.getCompound("pos"));
-            Direction fromSide = Direction.from3DDataValue(from.getInt("side"));
-            brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), fromPos.relative(fromSide));
+            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
+            brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), from);
             
-            CompoundTag to = tag.getCompound("to");
-            BlockPos toPos = NbtUtils.readBlockPos(to.getCompound("pos"));
-            Direction toSide = Direction.from3DDataValue(to.getInt("side"));
-            brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), toPos.relative(toSide));
-            
+            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
+            brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), to);
             return InteractionResult.SUCCESS;
         }
         return super.interactLivingEntity(stack, player, interactionTarget, usedHand);
@@ -63,15 +61,11 @@ public class AllayMapItem extends Item {
         
         CompoundTag tag = stack.getOrCreateTag();
         if (tag.contains("from") && tag.contains("to")) {
-            CompoundTag from = tag.getCompound("from");
-            BlockPos fromPos = NbtUtils.readBlockPos(from.getCompound("pos"));
-            Direction fromSide = Direction.from3DDataValue(from.getInt("side"));
-            tooltipComponents.add(ModUtil.getTranslation("target.from", fromPos, fromSide).withStyle(ChatFormatting.DARK_GRAY));
-            // TODO Record
-            CompoundTag to = tag.getCompound("to");
-            BlockPos toPos = NbtUtils.readBlockPos(to.getCompound("pos"));
-            Direction toSide = Direction.from3DDataValue(to.getInt("side"));
-            tooltipComponents.add(ModUtil.getTranslation("target.to", toPos, toSide).withStyle(ChatFormatting.DARK_GRAY));
+            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
+            tooltipComponents.add(ModUtil.getTranslation("target.from", from.pos(), from.side()).withStyle(ChatFormatting.DARK_GRAY));
+            
+            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
+            tooltipComponents.add(ModUtil.getTranslation("target.to", to.pos(), to.side()).withStyle(ChatFormatting.DARK_GRAY));
         }
         else tooltipComponents.add(ModUtil.getItemTranslation(this, "invalid").withStyle(ChatFormatting.DARK_GRAY));
     }
