@@ -3,6 +3,7 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -61,13 +62,12 @@ public class EventHandler {
         ItemStack stack = event.getItemStack();
         Entity target = event.getTarget();
         
-        if (target instanceof Allay allay && stack.getItem() instanceof MindControlDeviceItem) { // TODO Sound
+        if (target instanceof Allay allay && stack.getItem() instanceof MindControlDeviceItem) {
             for (InteractionHand hand : InteractionHand.values()) {
                 ItemStack stackInHand = allay.getItemInHand(hand);
                 ItemEntity item = new ItemEntity(allay.level, allay.getX(), allay.getY(), allay.getZ(), stackInHand);
                 item.setDeltaMovement(0, 0, 0);
                 allay.level.addFreshEntity(item);
-                
                 allay.setItemInHand(hand, ItemStack.EMPTY);
             }
             
@@ -77,7 +77,8 @@ public class EventHandler {
             
             allay.remove(Entity.RemovalReason.DISCARDED);
             allay.level.addFreshEntity(hijackedAllay);
-//            stack.shrink(1);
+            stack.shrink(1);
+            allay.level.playSound(event.getPlayer(), hijackedAllay.getX(), hijackedAllay.getY(), hijackedAllay.getZ(), ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
             
             event.setCancellationResult(InteractionResult.CONSUME);
             event.setCanceled(true);

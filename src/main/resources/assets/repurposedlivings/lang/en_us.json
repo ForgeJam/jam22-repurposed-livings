@@ -4,5 +4,7 @@
     "item.repurposedlivings.allay_map": "Allay Map",
     "item.repurposedlivings.mind_control_device": "Mind Control Device",
     
-    "entity.repurposedlivings.hijacked_allay": "Hijacked Allay"
+    "entity.repurposedlivings.hijacked_allay": "Hijacked Allay",
+    
+    "sounds.repurposedlivings.mind_control_device_attach": "Mind Control Devide attach"
 }

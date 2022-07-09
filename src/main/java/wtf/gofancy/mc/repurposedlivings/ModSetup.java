@@ -1,6 +1,8 @@
 package wtf.gofancy.mc.repurposedlivings;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -24,6 +26,7 @@ public final class ModSetup {
     private static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES = DeferredRegister.create(ForgeRegistries.MEMORY_MODULE_TYPES, RepurposedLivings.MODID);
     private static final DeferredRegister<Activity> ACTIVITIES = DeferredRegister.create(ForgeRegistries.ACTIVITIES, RepurposedLivings.MODID);
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, RepurposedLivings.MODID);
+    private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, RepurposedLivings.MODID);
     
     public static final CreativeModeTab REPURPOSED_LIVINGS_TAB = new CreativeModeTab(RepurposedLivings.MODID) {
         @Override
@@ -47,11 +50,14 @@ public final class ModSetup {
         .updateInterval(2)
         .build("hijacked_allay"));
     
+    public static final RegistryObject<SoundEvent> MIND_CONTROL_DEVICE_ATTACH_SOUND = SOUNDS.register("mind_control_device_attach", () -> new SoundEvent(new ResourceLocation(RepurposedLivings.MODID, "mind_control_device_attach")));
+    
     static void register(IEventBus bus) {
         ITEMS.register(bus);
         MEMORY_MODULE_TYPES.register(bus);
         ACTIVITIES.register(bus);
         ENTITIES.register(bus);
+        SOUNDS.register(bus);
     }
     
     private ModSetup() {}
