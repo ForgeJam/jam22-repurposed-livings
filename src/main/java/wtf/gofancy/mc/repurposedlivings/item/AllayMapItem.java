@@ -42,7 +42,6 @@ public class AllayMapItem extends Item {
         if (interactionTarget instanceof HijackedAllay allay) {
             Brain<Allay> brain = allay.getBrain();
             CompoundTag tag = stack.getTag();
-            // TODO Find free space around target
             CompoundTag from = tag.getCompound("from");
             BlockPos fromPos = NbtUtils.readBlockPos(from.getCompound("pos"));
             Direction fromSide = Direction.from3DDataValue(from.getInt("side"));
@@ -67,13 +66,13 @@ public class AllayMapItem extends Item {
             CompoundTag from = tag.getCompound("from");
             BlockPos fromPos = NbtUtils.readBlockPos(from.getCompound("pos"));
             Direction fromSide = Direction.from3DDataValue(from.getInt("side"));
-            tooltipComponents.add(Component.literal("From: " + fromPos + ", " + fromSide).withStyle(ChatFormatting.DARK_GRAY));
-            
+            tooltipComponents.add(ModUtil.getTranslation("target.from", fromPos, fromSide).withStyle(ChatFormatting.DARK_GRAY));
+            // TODO Record
             CompoundTag to = tag.getCompound("to");
             BlockPos toPos = NbtUtils.readBlockPos(to.getCompound("pos"));
             Direction toSide = Direction.from3DDataValue(to.getInt("side"));
-            tooltipComponents.add(Component.literal("To: " + toPos + ", " + toSide).withStyle(ChatFormatting.DARK_GRAY));
+            tooltipComponents.add(ModUtil.getTranslation("target.to", toPos, toSide).withStyle(ChatFormatting.DARK_GRAY));
         }
-        else tooltipComponents.add(Component.literal("Invalid").withStyle(ChatFormatting.DARK_GRAY));
+        else tooltipComponents.add(ModUtil.getItemTranslation(this, "invalid").withStyle(ChatFormatting.DARK_GRAY));
     }
 }

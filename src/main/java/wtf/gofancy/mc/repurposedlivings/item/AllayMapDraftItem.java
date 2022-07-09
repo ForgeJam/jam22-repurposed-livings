@@ -49,13 +49,13 @@ public class AllayMapDraftItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
         
-        tooltipComponents.add(Component.literal("Shift-Click another target to complete").withStyle(ChatFormatting.AQUA));
+        tooltipComponents.add(ModUtil.getItemTranslation(this, "complete_draft").withStyle(ChatFormatting.AQUA));
         CompoundTag tag = stack.getOrCreateTag();
         if (tag.contains("from")) {
             CompoundTag from = tag.getCompound("from");
             BlockPos pos = NbtUtils.readBlockPos(from.getCompound("pos"));
             Direction side = Direction.from3DDataValue(from.getInt("side"));
-            tooltipComponents.add(Component.literal("From: " + pos + ", " + side).withStyle(ChatFormatting.DARK_GRAY));
+            tooltipComponents.add(ModUtil.getTranslation("target.from", pos, side).withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 }

@@ -2,8 +2,12 @@
     "itemGroup.repurposedlivings": "Repurposed Livings",
     
     "item.repurposedlivings.allay_map": "Allay Map",
+    "item.repurposedlivings.allay_map.invalid": "Invalid",
     "item.repurposedlivings.allay_map_draft": "Allay Map Draft",
     "item.repurposedlivings.mind_control_device": "Mind Control Device",
+    "item.repurposedlivings.allay_map_draft.complete_draft": "Shift-Click another target to complete",
+    "repurposedlivings.target.from": "From: %s, Side: %s",
+    "repurposedlivings.target.to": "To: %s, Side: %s",
     
     "entity.repurposedlivings.hijacked_allay": "Hijacked Allay",
     

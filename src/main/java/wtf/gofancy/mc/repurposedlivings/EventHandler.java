@@ -4,7 +4,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -37,7 +36,7 @@ public class EventHandler {
             if (item instanceof EmptyMapItem) {
                 ItemStack draftStack = AllayMapDraftItem.create(pos, side);
                 player.setItemInHand(event.getHand(), draftStack);
-                player.displayClientMessage(Component.literal("Shift-Click another target to complete").withStyle(ChatFormatting.AQUA), true);
+                player.displayClientMessage(ModUtil.getItemTranslation(draftStack.getItem(), "complete_draft").withStyle(ChatFormatting.AQUA), true);
 
                 event.setCancellationResult(InteractionResult.CONSUME);
                 event.setCanceled(true);
