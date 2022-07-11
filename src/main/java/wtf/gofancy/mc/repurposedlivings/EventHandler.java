@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EmptyMapItem;
@@ -52,6 +53,7 @@ public class EventHandler {
         if (target instanceof Allay allay && stack.getItem() == ModSetup.MIND_CONTROL_DEVICE.get()) {
             allay.dropEquipment();
             if (!allay.level.isClientSide) {
+                allay.getBrain().eraseMemory(MemoryModuleType.LIKED_PLAYER);
                 CompoundTag allayTag = allay.saveWithoutId(new CompoundTag());
                 HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), allay.level);
                 hijackedAllay.load(allayTag);

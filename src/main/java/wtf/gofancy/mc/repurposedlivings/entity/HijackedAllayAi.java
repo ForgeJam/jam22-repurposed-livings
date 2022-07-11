@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.AnimalPanic;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.Swim;
@@ -31,7 +30,6 @@ public class HijackedAllayAi extends AllayAi {
     private static void initCoreActivity(Brain<Allay> brain) {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
             new Swim(0.8F),
-            new AnimalPanic(2.5F),
             new LookAtTargetSink(45, 90),
             new MoveToTargetSink()
         ));

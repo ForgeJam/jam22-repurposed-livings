@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.network.Network;
 
 @Mod(RepurposedLivings.MODID)
 public class RepurposedLivings {
@@ -18,6 +19,8 @@ public class RepurposedLivings {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::onEntityAttributeCreation);
         ModSetup.register(bus);
+        
+        Network.registerPackets();
         
         MinecraftForge.EVENT_BUS.register(new EventHandler());
     }
