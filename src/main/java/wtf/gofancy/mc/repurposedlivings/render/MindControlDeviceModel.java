@@ -44,6 +44,11 @@ public class MindControlDeviceModel<T extends Entity> extends EntityModel<T> {
 		this.root.getAllParts().forEach(ModelPart::resetPose);
 		this.root.xRot = headPitch * ((float)Math.PI / 180F);
 		this.root.yRot = netHeadYaw * ((float)Math.PI / 180F);
+		
+		float swing = Math.min(limbSwingAmount / 0.3F, 1.0F);
+		float swingAmount = 1.0F - swing;
+		float animAge = ageInTicks * 9.0F * ((float) Math.PI / 180F);
+		this.root.y += (float) Math.cos(animAge) * 0.25F * swingAmount;
 	}
 
 	@Override

@@ -3,11 +3,11 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EmptyMapItem;
@@ -52,16 +52,17 @@ public class EventHandler {
 
         if (target instanceof Allay allay && stack.getItem() == ModSetup.MIND_CONTROL_DEVICE.get()) {
             allay.dropEquipment();
-            if (!allay.level.isClientSide) {
-                allay.getBrain().eraseMemory(MemoryModuleType.LIKED_PLAYER);
-                CompoundTag allayTag = allay.saveWithoutId(new CompoundTag());
+            if (allay.level instanceof ServerLevel serverLevel) {
                 HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), allay.level);
-                hijackedAllay.load(allayTag);
+                hijackedAllay.moveTo(allay.position());
+                hijackedAllay.setPersistenceRequired();
                 hijackedAllay.setEquipmentSlot(AllayEquipment.CONTROLLER, stack.copy());
 
                 allay.remove(Entity.RemovalReason.DISCARDED);
                 allay.level.addFreshEntity(hijackedAllay);
                 stack.shrink(1);
+                
+                serverLevel.sendParticles(ParticleTypes.WITCH, hijackedAllay.getX(), hijackedAllay.getY() + 0.2, hijackedAllay.getZ(), 30, 0.35, 0.35, 0.35, 0);
             }
             allay.level.playSound(event.getPlayer(), allay.getX(), allay.getY(), allay.getZ(), ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
 
