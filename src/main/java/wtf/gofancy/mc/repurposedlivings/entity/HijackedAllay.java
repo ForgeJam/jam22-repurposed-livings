@@ -4,16 +4,20 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,13 +33,14 @@ import net.minecraftforge.items.IItemHandler;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class HijackedAllay extends Allay {
+    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.HURT_BY);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
-        MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.LIKED_PLAYER,
+        MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, 
+        MemoryModuleType.IS_PANICKING, MemoryModuleType.HURT_BY, MemoryModuleType.LIKED_PLAYER,
         MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, ModSetup.ALLAY_SOURCE_TARET.get(), ModSetup.ALLAY_DELIVERY_TARET.get()
     );
     
@@ -55,12 +60,14 @@ public class HijackedAllay extends Allay {
 
     @Override
     protected Brain.Provider<Allay> brainProvider() {
-        return Brain.provider(MEMORY_TYPES, List.of());
+        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-        return HijackedAllayAi.makeBrain(this.brainProvider().makeBrain(dynamic));
+        Brain<?> brain = brainProvider().makeBrain(dynamic);
+        return HijackedAllayAi.createBrain((Brain<HijackedAllay>) brain);
     }
 
     @Override
@@ -76,6 +83,26 @@ public class HijackedAllay extends Allay {
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         return InteractionResult.PASS;
+    }
+
+    public void onPanicStopped() {
+        if (this.level.random.nextInt(100) < 35) {
+            this.brain.useDefaultActivity();
+            if (this.level instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(ParticleTypes.WITCH, getX(), getY() + 0.2, getZ(), 30, 0.35, 0.35, 0.35, 0);
+            } else {
+                this.level.playLocalSound(getX(), getY(), getZ(), ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1, false);
+            }
+        }
+        else {
+            dropEquipment();
+            Allay allay = new Allay(EntityType.ALLAY, this.level);
+            allay.moveTo(this.position());
+            allay.setPersistenceRequired();
+            
+            remove(RemovalReason.DISCARDED);
+            this.level.addFreshEntity(allay);
+        }
     }
 
     @Override

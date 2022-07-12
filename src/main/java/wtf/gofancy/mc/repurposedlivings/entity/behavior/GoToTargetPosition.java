@@ -19,7 +19,7 @@ public class GoToTargetPosition<E extends Mob, M> extends Behavior<E> {
    private final Predicate<E> condition;
 
    public GoToTargetPosition(MemoryModuleType<M> locationMemory, Function<M, BlockPos> posGetter, float speedModifier, Predicate<E> condition) {
-      super(ImmutableMap.of(locationMemory, MemoryStatus.VALUE_PRESENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED));
+      super(ImmutableMap.of(locationMemory, MemoryStatus.VALUE_PRESENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.IS_PANICKING, MemoryStatus.VALUE_ABSENT));
       this.locationMemory = locationMemory;
       this.posGetter = posGetter;
       this.speedModifier = speedModifier;
