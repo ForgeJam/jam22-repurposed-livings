@@ -55,7 +55,7 @@ public class AllayMapDraftItem extends Item {
         CompoundTag tag = stack.getOrCreateTag();
         if (tag.contains("from")) {
             ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
-            tooltipComponents.add(ModUtil.getTranslation("target.from", from.pos(), from.side()).withStyle(ChatFormatting.DARK_GRAY));
+            tooltipComponents.add(ModUtil.getTargetTranslation("target.from", from).withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 }

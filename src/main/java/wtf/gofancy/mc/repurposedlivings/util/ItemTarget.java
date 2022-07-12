@@ -23,6 +23,10 @@ public record ItemTarget(BlockPos pos, Direction side) {
         DataResult<Tag> result = ItemTarget.CODEC.encodeStart(NbtOps.INSTANCE, this);
         return result.getOrThrow(false, str -> {});
     }
+    
+    public ItemTarget withSide(Direction side) {
+        return new ItemTarget(pos(), side);
+    }
 
     public BlockPos getRelativePos() {
         return pos().relative(side());

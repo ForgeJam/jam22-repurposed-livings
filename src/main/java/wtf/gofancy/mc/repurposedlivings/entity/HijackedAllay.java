@@ -39,7 +39,7 @@ public class HijackedAllay extends Allay {
         MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, ModSetup.ALLAY_SOURCE_TARET.get(), ModSetup.ALLAY_DELIVERY_TARET.get()
     );
     
-    private final NonNullList<ItemStack> equipmentSlots = NonNullList.withSize(4, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> equipmentSlots = NonNullList.withSize(AllayEquipment.values().length, ItemStack.EMPTY);
 
     public HijackedAllay(EntityType<? extends HijackedAllay> type, Level level) {
         super(type, level);

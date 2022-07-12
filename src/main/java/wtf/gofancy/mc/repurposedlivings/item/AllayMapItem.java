@@ -30,6 +30,7 @@ import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class AllayMapItem extends Item {
 
@@ -68,7 +69,7 @@ public class AllayMapItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        if (player instanceof ServerPlayer serverPlayer) {
+        if (player instanceof ServerPlayer serverPlayer && ensureTargetsLoaded(level, player, player.getItemInHand(usedHand))) {
             NetworkHooks.openGui(serverPlayer, new AllayMapMenuProvider(usedHand), buf -> buf.writeEnum(usedHand));
         }
         return super.use(level, player, usedHand);
@@ -81,18 +82,34 @@ public class AllayMapItem extends Item {
         CompoundTag tag = stack.getOrCreateTag();
         if (tag.contains("from") && tag.contains("to")) {
             ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
-            tooltipComponents.add(ModUtil.getTranslation("target.from", from.pos(), from.side()).withStyle(ChatFormatting.DARK_GRAY));
+            tooltipComponents.add(ModUtil.getTargetTranslation("target.from", from).withStyle(ChatFormatting.DARK_GRAY));
 
             ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
-            tooltipComponents.add(ModUtil.getTranslation("target.to", to.pos(), to.side()).withStyle(ChatFormatting.DARK_GRAY));
-        } else tooltipComponents.add(ModUtil.getItemTranslation(this, "invalid").withStyle(ChatFormatting.DARK_GRAY));
+            tooltipComponents.add(ModUtil.getTargetTranslation("target.to", to).withStyle(ChatFormatting.DARK_GRAY));
+        }
+        else {
+            tooltipComponents.add(ModUtil.getItemTranslation(this, "invalid").withStyle(ChatFormatting.DARK_GRAY));
+        }
     }
 
+    private boolean ensureTargetsLoaded(Level level, Player player, ItemStack stack) {
+        CompoundTag tag = stack.getOrCreateTag();
+        if (tag.contains("from") && tag.contains("to")) {
+            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
+            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
+            
+            boolean loaded = Stream.of(from.pos(), from.getRelativePos(), to.pos(), to.getRelativePos()).allMatch(level::isLoaded);
+            if (!loaded) player.displayClientMessage(ModUtil.getItemTranslation(this, "out_of_range").withStyle(ChatFormatting.RED), true);
+            else return true;
+        }
+        return false;
+    }
+    
     private record AllayMapMenuProvider(InteractionHand hand) implements MenuProvider {
 
         @Override
             public Component getDisplayName() {
-                return Component.literal("Allay Map"); // TODO
+                return ModSetup.ALLAY_MAP.get().getDescription();
             }
     
             @Nullable

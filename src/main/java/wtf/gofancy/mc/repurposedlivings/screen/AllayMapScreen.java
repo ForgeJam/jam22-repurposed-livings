@@ -5,7 +5,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,7 +13,6 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,51 +20,54 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.RepurposedLivings;
 import wtf.gofancy.mc.repurposedlivings.container.AllayMapContainer;
-import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.network.UpdateAllayMapTargetSide;
+import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
+import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class AllayMapScreen extends AbstractContainerScreen<AllayMapContainer> {
     public static final ResourceLocation BACKGROUND = new ResourceLocation(RepurposedLivings.MODID, "textures/gui/allay_map.png");
-    
-    private EditBox sourcePos;
 
     public AllayMapScreen(AllayMapContainer menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
+        this.imageWidth = 216;
     }
 
     @Override
     protected void init() {
         super.init();
-        
-        BlockPos sourcePos = this.menu.getSourceTarget().pos();
-        String sourcePosStr = String.format("X: %s, Y: %s, Z: %s", sourcePos.getX(), sourcePos.getY(), sourcePos.getZ());
-        this.sourcePos = new EditBox(this.font, this.leftPos + 30, this.topPos + 55, 10 + this.font.width(sourcePosStr), 12, Component.literal("Pos"));
-        this.sourcePos.setBordered(true);
-        this.sourcePos.setEditable(false);
-        this.sourcePos.setValue(sourcePosStr);
-        addWidget(this.sourcePos);
-        
-        addRenderableWidget(new Button(this.leftPos + 70, this.topPos + 28, 40, 20, Component.literal("Change"), button -> {
-            Direction side = this.menu.getSourceTarget().side();
-            Direction next = Direction.values()[(side.ordinal() + 1) % Direction.values().length];
-            Network.INSTANCE.sendToServer(new UpdateAllayMapTargetSide(this.menu.getHand(), UpdateAllayMapTargetSide.Target.SOURCE, next));
+
+        addTarget(this.leftPos + 10, this.topPos + 25 + this.font.lineHeight, UpdateAllayMapTargetSide.Target.SOURCE, this.menu::getSourceTarget, this.menu::setSourceTarget);
+        addTarget(this.leftPos + 10, this.topPos + 95 + this.font.lineHeight, UpdateAllayMapTargetSide.Target.DESTINATION, this.menu::getDestinationTarget, this.menu::setDestinationTarget);
+    }
+    
+    private void addTarget(int x, int y, UpdateAllayMapTargetSide.Target target, Supplier<ItemTarget> getter, Consumer<ItemTarget> setter) {
+        addTargetSideButton(x + 152, y + 18, target, getter, setter);
+    }
+    
+    private void addTargetSideButton(int x, int y, UpdateAllayMapTargetSide.Target target, Supplier<ItemTarget> getter, Consumer<ItemTarget> setter) {
+        addRenderableWidget(new Button(x, y, 40, 20, getTranslationForSide(getter.get().side()), button -> {
+            Direction next = this.menu.setTargetSide(target, getter, setter);
+            button.setMessage(getTranslationForSide(next));
         }));
-        
-        addRenderableWidget(new Button(this.leftPos + 70, this.topPos + 100, 40, 20, Component.literal("Change"), button -> {
-            Direction side = this.menu.getDestinationTarget().side();
-            Direction next = Direction.values()[(side.ordinal() + 1) % Direction.values().length];
-            Network.INSTANCE.sendToServer(new UpdateAllayMapTargetSide(this.menu.getHand(), UpdateAllayMapTargetSide.Target.DESTINATION, next));
-        }));
+    }
+    
+    private static Component getTranslationForSide(Direction side) {
+        return ModUtil.getItemTranslation(ModSetup.ALLAY_MAP.get(), "side." + side.getName());
     }
 
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTick);
-        renderFg(poseStack, mouseX, mouseY, partialTick);
+        renderFg(poseStack);
     }
 
     @Override
@@ -77,14 +78,24 @@ public class AllayMapScreen extends AbstractContainerScreen<AllayMapContainer> {
         blit(poseStack, relX, relY, 0, 0, this.imageWidth, this.imageHeight);
     }
     
-    public void renderFg(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        BlockEntity be = this.minecraft.level.getBlockEntity(this.menu.getSourceTarget().pos());
-        if (be != null) {
-            Block block = be.getBlockState().getBlock();
-            renderScaledItemIntoGui(new ItemStack(block), this.leftPos + 10, this.topPos + 20, 2);   
-        }
+    public void renderFg(PoseStack poseStack) {
+        renderTarget("source_target", this.menu.getSourceTarget(), poseStack, this.leftPos + 10, this.topPos + 25);
+        renderTarget("destination_target", this.menu.getDestinationTarget(), poseStack, this.leftPos + 10, this.topPos + 95);
+    }
+    
+    private void renderTarget(String key, ItemTarget target, PoseStack poseStack, int x, int y) {
+        BlockEntity be = this.minecraft.level.getBlockEntity(target.pos());
+        Block block = be != null ? be.getBlockState().getBlock() : Blocks.CHEST;
+        renderScaledItemIntoGui(new ItemStack(block), x, y + 10, 2);
+
+        this.font.draw(poseStack, ModUtil.getContainerTranslation("allay_map", key), x + 40, y, 4210752);
         
-        this.sourcePos.render(poseStack, mouseX, mouseY, partialTick);
+        this.font.draw(poseStack, ModUtil.getContainerTranslation("allay_map", "pos"), x + 40, y + 13, 4210752);
+        this.font.draw(poseStack, ModUtil.getContainerTranslation("allay_map", "pos.x", target.pos().getX()), x + 40, y + 15 + this.font.lineHeight, 4210752);
+        this.font.draw(poseStack, ModUtil.getContainerTranslation("allay_map", "pos.y", target.pos().getY()), x + 40, y + 15 + this.font.lineHeight * 2, 4210752);
+        this.font.draw(poseStack, ModUtil.getContainerTranslation("allay_map", "pos.z", target.pos().getZ()), x + 40, y + 15 + this.font.lineHeight * 3, 4210752);
+        
+        this.font.draw(poseStack, ModUtil.getItemTranslation(ModSetup.ALLAY_MAP.get(), "side"), x + 152, y + 15, 4210752);
     }
     
     @Override
