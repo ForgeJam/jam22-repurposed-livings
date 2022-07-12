@@ -1,0 +1,6 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "repurposedlivings:item/mind_control_device"
+    }
+}

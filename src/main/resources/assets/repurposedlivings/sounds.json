@@ -1,0 +1,8 @@
+{
+    "mind_control_device_attach": {
+        "subtitle": "sounds.repurposedlivings.mind_control_device_attach",
+        "sounds": [
+            "repurposedlivings:mind_control_device_attach"
+        ]
+    }
+}

@@ -1,0 +1,31 @@
+{
+    "itemGroup.repurposedlivings": "Repurposed Livings",
+    
+    "item.repurposedlivings.allay_map": "Allay Map",
+    "item.repurposedlivings.allay_map.invalid": "Invalid",
+    "item.repurposedlivings.allay_map.out_of_range": "Out of Range",
+    "item.repurposedlivings.allay_map.pos": "Pos: [X=%s, Y=%s, Z=%s]",
+    "item.repurposedlivings.allay_map.side": "Side: ",
+    "item.repurposedlivings.allay_map.side.down": "Down",
+    "item.repurposedlivings.allay_map.side.up": "Up",
+    "item.repurposedlivings.allay_map.side.north": "North",
+    "item.repurposedlivings.allay_map.side.south": "South",
+    "item.repurposedlivings.allay_map.side.west": "West",
+    "item.repurposedlivings.allay_map.side.east": "East",
+    "item.repurposedlivings.allay_map_draft": "Allay Map Draft",
+    "item.repurposedlivings.mind_control_device": "Mind Control Device",
+    "item.repurposedlivings.allay_map_draft.complete_draft": "Shift-Click another target to complete",
+    "repurposedlivings.target.from": "From: ",
+    "repurposedlivings.target.to": "To: ",
+    
+    "entity.repurposedlivings.hijacked_allay": "Hijacked Allay",
+    
+    "sounds.repurposedlivings.mind_control_device_attach": "Mind Control Devide attach",
+    
+    "container.repurposedlivings.allay_map.source_target": "Source Target",
+    "container.repurposedlivings.allay_map.destination_target": "Destination Target",
+    "container.repurposedlivings.allay_map.pos": "Pos:",
+    "container.repurposedlivings.allay_map.pos.x": "X: %s",
+    "container.repurposedlivings.allay_map.pos.y": "Y: %s",
+    "container.repurposedlivings.allay_map.pos.z": "Z: %s"
+}
