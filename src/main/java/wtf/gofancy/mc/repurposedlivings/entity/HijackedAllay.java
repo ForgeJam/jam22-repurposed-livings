@@ -8,6 +8,8 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -43,17 +45,24 @@ public class HijackedAllay extends Allay {
         MemoryModuleType.IS_PANICKING, MemoryModuleType.HURT_BY, MemoryModuleType.LIKED_PLAYER,
         MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, ModSetup.ALLAY_SOURCE_TARET.get(), ModSetup.ALLAY_DELIVERY_TARET.get()
     );
-    
-    private final NonNullList<ItemStack> equipmentSlots = NonNullList.withSize(AllayEquipment.values().length, ItemStack.EMPTY);
+    protected static final EntityDataAccessor<NonNullList<ItemStack>> EQUIPMENT_SLOTS = SynchedEntityData.defineId(HijackedAllay.class, ModSetup.ITEM_STACK_LIST_SERIALIZER.get());
 
     public HijackedAllay(EntityType<? extends HijackedAllay> type, Level level) {
         super(type, level);
     }
 
+    public NonNullList<ItemStack> getEquipmentSlots() {
+        return this.entityData.get(EQUIPMENT_SLOTS);
+    }
+
+    public ItemStack getItemInSlot(AllayEquipment slot) {
+        return getEquipmentSlots().get(slot.ordinal());
+    }
+
     public void setEquipmentSlot(AllayEquipment slot, ItemStack stack) {
         this.verifyEquippedItem(stack);
         int index = slot.ordinal();
-        if (!stack.isEmpty() && !ItemStack.isSameIgnoreDurability(stack, this.equipmentSlots.set(index, stack))) {
+        if (!stack.isEmpty() && !ItemStack.isSameIgnoreDurability(stack, getEquipmentSlots().set(index, stack))) {
             this.playEquipSound(stack);
         }
     }
@@ -68,6 +77,12 @@ public class HijackedAllay extends Allay {
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
         Brain<?> brain = brainProvider().makeBrain(dynamic);
         return HijackedAllayAi.createBrain((Brain<HijackedAllay>) brain);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(EQUIPMENT_SLOTS, NonNullList.withSize(AllayEquipment.values().length, ItemStack.EMPTY));
     }
 
     @Override
@@ -86,13 +101,8 @@ public class HijackedAllay extends Allay {
     }
 
     public void onPanicStopped() {
-        if (this.level.random.nextInt(100) < 35) {
-            this.brain.useDefaultActivity();
-            if (this.level instanceof ServerLevel serverLevel) {
-                serverLevel.sendParticles(ParticleTypes.WITCH, getX(), getY() + 0.2, getZ(), 30, 0.35, 0.35, 0.35, 0);
-            } else {
-                this.level.playLocalSound(getX(), getY(), getZ(), ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1, false);
-            }
+        if (this.level.random.nextInt(100) < 25) {
+            onHijackActivated();
         }
         else {
             dropEquipment();
@@ -102,6 +112,14 @@ public class HijackedAllay extends Allay {
             
             remove(RemovalReason.DISCARDED);
             this.level.addFreshEntity(allay);
+        }
+    }
+    
+    public void onHijackActivated() {
+        if (this.level instanceof ServerLevel serverLevel) {
+            this.brain.useDefaultActivity();
+            serverLevel.sendParticles(ParticleTypes.WITCH, getX(), getY() + 0.2, getZ(), 30, 0.35, 0.35, 0.35, 0);
+            this.level.playSound(null, this, ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
         }
     }
 
@@ -126,7 +144,7 @@ public class HijackedAllay extends Allay {
     @Override
     public void dropEquipment() {
         super.dropEquipment();
-        this.equipmentSlots.forEach(this::spawnAtLocation);
+        getEquipmentSlots().forEach(this::spawnAtLocation);
     }
 
     @Override
@@ -134,7 +152,7 @@ public class HijackedAllay extends Allay {
         super.addAdditionalSaveData(tag);
 
         ListTag list = new ListTag();
-        for (ItemStack stack : this.equipmentSlots) {
+        for (ItemStack stack : getEquipmentSlots()) {
             CompoundTag stackTag = new CompoundTag();
             if (!stack.isEmpty()) stack.save(stackTag);
             list.add(stackTag);
@@ -149,8 +167,9 @@ public class HijackedAllay extends Allay {
         if (tag.contains("EquipmentSlots", Tag.TAG_LIST)) {
             ListTag list = tag.getList("EquipmentSlots", Tag.TAG_COMPOUND);
 
-            for (int i = 0; i < this.equipmentSlots.size(); ++i) {
-                this.equipmentSlots.set(i, ItemStack.of(list.getCompound(i)));
+            NonNullList<ItemStack> equipmentSlots = getEquipmentSlots();
+            for (int i = 0; i < equipmentSlots.size(); ++i) {
+                equipmentSlots.set(i, ItemStack.of(list.getCompound(i)));
             }
         }
     }

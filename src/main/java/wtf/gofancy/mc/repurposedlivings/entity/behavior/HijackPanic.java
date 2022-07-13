@@ -17,14 +17,13 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class HijackPanic extends Behavior<HijackedAllay> {
-    public static final int PANIC_MIN_DURATION = 120;
-    public static final int PANIC_MAX_DURATION = 120;
+    public static final int PANIC_DURATION = 100;
     private static final int PANIC_DISTANCE_HORIZONTAL = 2;
     private static final int PANIC_DISTANCE_VERTICAL = 2;
     private final float speedMultiplier;
 
     public HijackPanic(float speedMultiplier) {
-        super(ImmutableMap.of(), PANIC_MIN_DURATION, PANIC_MAX_DURATION);
+        super(ImmutableMap.of(), PANIC_DURATION, PANIC_DURATION);
         this.speedMultiplier = speedMultiplier;
     }
 

@@ -5,21 +5,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.EmptyMapItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import wtf.gofancy.mc.repurposedlivings.entity.AllayEquipment;
-import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapDraftItem;
+import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
-
-import java.util.List;
 
 public class EventHandler {
 
@@ -49,23 +45,13 @@ public class EventHandler {
     public void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         ItemStack stack = event.getItemStack();
         Entity target = event.getTarget();
-
-        if (target instanceof Allay allay && stack.getItem() == ModSetup.MIND_CONTROL_DEVICE.get()) {
-            allay.dropEquipment();
-            if (!allay.level.isClientSide) {
-                HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), allay.level);
-                hijackedAllay.moveTo(allay.position());
-                hijackedAllay.setPersistenceRequired();
-                hijackedAllay.setEquipmentSlot(AllayEquipment.CONTROLLER, stack.copy());
-                hijackedAllay.getBrain().setActiveActivityToFirstValid(List.of(Activity.PANIC));
-
-                allay.remove(Entity.RemovalReason.DISCARDED);
-                allay.level.addFreshEntity(hijackedAllay);
-                stack.shrink(1);
+        Item item = stack.getItem();
+        
+        if (item instanceof MindControlDevice controller && target instanceof LivingEntity livingEntity) {
+            if (controller.interactLivingEntityFirst(livingEntity, stack)) {
+                event.setCancellationResult(InteractionResult.SUCCESS);
+                event.setCanceled(true);
             }
-
-            event.setCancellationResult(InteractionResult.CONSUME);
-            event.setCanceled(true);
         }
     }
 }

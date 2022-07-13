@@ -13,8 +13,10 @@
     "item.repurposedlivings.allay_map.side.west": "West",
     "item.repurposedlivings.allay_map.side.east": "East",
     "item.repurposedlivings.allay_map_draft": "Allay Map Draft",
-    "item.repurposedlivings.mind_control_device": "Mind Control Device",
     "item.repurposedlivings.allay_map_draft.complete_draft": "Shift-Click another target to complete",
+    "item.repurposedlivings.echo_pearl": "Echo Pearl",
+    "item.repurposedlivings.mind_control_device": "Mind Control Device",
+    "item.repurposedlivings.echo_mind_control_device": "Echo Mind Control Device",
     "repurposedlivings.target.from": "From: ",
     "repurposedlivings.target.to": "To: ",
     

@@ -1,5 +1,7 @@
 package wtf.gofancy.mc.repurposedlivings;
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -20,6 +22,9 @@ import wtf.gofancy.mc.repurposedlivings.container.AllayMapContainer;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapDraftItem;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
+import wtf.gofancy.mc.repurposedlivings.item.EchoMindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.util.ItemStackListEntityDataSerializer;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
 import java.util.Optional;
@@ -31,6 +36,7 @@ public final class ModSetup {
     private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, RepurposedLivings.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, RepurposedLivings.MODID);
     private static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, RepurposedLivings.MODID);
+    private static final DeferredRegister<EntityDataSerializer<?>> DATA_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.DATA_SERIALIZERS, RepurposedLivings.MODID);
     
     public static final CreativeModeTab REPURPOSED_LIVINGS_TAB = new CreativeModeTab(RepurposedLivings.MODID) {
         @Override
@@ -42,7 +48,9 @@ public final class ModSetup {
     
     public static final RegistryObject<Item> ALLAY_MAP = ITEMS.register("allay_map", AllayMapItem::new);
     public static final RegistryObject<Item> ALLAY_MAP_DRAFT = ITEMS.register("allay_map_draft", AllayMapDraftItem::new);
-    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new Item(ITEM_PROPERTIES.stacksTo(1)));
+    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDevice(ITEM_PROPERTIES));
+    public static final RegistryObject<Item> ECHO_MIND_CONTROL_DEVICE = ITEMS.register("echo_mind_control_device", () -> new EchoMindControlDevice(ITEM_PROPERTIES));
+    public static final RegistryObject<Item> ECHO_PEARL = ITEMS.register("echo_pearl", () -> new Item(ITEM_PROPERTIES));
     
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
@@ -60,6 +68,8 @@ public final class ModSetup {
     public static final RegistryObject<MenuType<AllayMapContainer>> POWERGEN_CONTAINER = CONTAINERS.register("powergen",
             () -> IForgeMenuType.create((windowId, inv, data) -> new AllayMapContainer(windowId, data.readEnum(InteractionHand.class), inv.player)));
     
+    public static final RegistryObject<EntityDataSerializer<NonNullList<ItemStack>>> ITEM_STACK_LIST_SERIALIZER = DATA_SERIALIZERS.register("item_stack_list", ItemStackListEntityDataSerializer::new);
+    
     static void register(IEventBus bus) {
         ITEMS.register(bus);
         MEMORY_MODULE_TYPES.register(bus);
@@ -67,6 +77,7 @@ public final class ModSetup {
         ENTITIES.register(bus);
         SOUNDS.register(bus);
         CONTAINERS.register(bus);
+        DATA_SERIALIZERS.register(bus);
     }
     
     private ModSetup() {}
