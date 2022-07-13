@@ -74,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    minecraft(group = "net.minecraftforge", name = "forge", version = "1.19-41.0.63")
+    minecraft(group = "net.minecraftforge", name = "forge", version = "1.19-41.0.98")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

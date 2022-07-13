@@ -21,10 +21,10 @@ public class EventHandler {
 
     @SubscribeEvent
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        Level level = event.getWorld();
+        Level level = event.getLevel();
         BlockPos pos = event.getPos();
         Direction side = event.getFace();
-        Player player = event.getPlayer();
+        Player player = event.getEntity();
 
         if (!level.isClientSide && player.isShiftKeyDown() && ModUtil.isContainer(level, pos, side)) {
             ItemStack stack = event.getItemStack();

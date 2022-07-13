@@ -33,10 +33,10 @@ public final class ModSetup {
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, RepurposedLivings.MODID);
     private static final DeferredRegister<MemoryModuleType<?>> MEMORY_MODULE_TYPES = DeferredRegister.create(ForgeRegistries.MEMORY_MODULE_TYPES, RepurposedLivings.MODID);
     private static final DeferredRegister<Activity> ACTIVITIES = DeferredRegister.create(ForgeRegistries.ACTIVITIES, RepurposedLivings.MODID);
-    private static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, RepurposedLivings.MODID);
+    private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, RepurposedLivings.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, RepurposedLivings.MODID);
-    private static final DeferredRegister<MenuType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS, RepurposedLivings.MODID);
-    private static final DeferredRegister<EntityDataSerializer<?>> DATA_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.DATA_SERIALIZERS, RepurposedLivings.MODID);
+    private static final DeferredRegister<MenuType<?>> MENU_TYPES = DeferredRegister.create(ForgeRegistries.MENU_TYPES, RepurposedLivings.MODID);
+    private static final DeferredRegister<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, RepurposedLivings.MODID);
     
     public static final CreativeModeTab REPURPOSED_LIVINGS_TAB = new CreativeModeTab(RepurposedLivings.MODID) {
         @Override
@@ -57,7 +57,7 @@ public final class ModSetup {
     
     public static final RegistryObject<Activity> ALLAY_TRANSFER_ITEMS = ACTIVITIES.register("allay_transfer_items", () -> new Activity("allay_transfer_items"));
     
-    public static final RegistryObject<EntityType<HijackedAllay>> HIJACKED_ALLAY_ENTITY = ENTITIES.register("hijacked_allay", () -> EntityType.Builder.of(HijackedAllay::new, MobCategory.CREATURE)
+    public static final RegistryObject<EntityType<HijackedAllay>> HIJACKED_ALLAY_ENTITY = ENTITY_TYPES.register("hijacked_allay", () -> EntityType.Builder.of(HijackedAllay::new, MobCategory.CREATURE)
         .sized(0.35F, 0.6F)
         .clientTrackingRange(8)
         .updateInterval(2)
@@ -65,19 +65,19 @@ public final class ModSetup {
     
     public static final RegistryObject<SoundEvent> MIND_CONTROL_DEVICE_ATTACH_SOUND = SOUNDS.register("mind_control_device_attach", () -> new SoundEvent(new ResourceLocation(RepurposedLivings.MODID, "mind_control_device_attach")));
     
-    public static final RegistryObject<MenuType<AllayMapContainer>> POWERGEN_CONTAINER = CONTAINERS.register("powergen",
+    public static final RegistryObject<MenuType<AllayMapContainer>> POWERGEN_CONTAINER = MENU_TYPES.register("powergen",
             () -> IForgeMenuType.create((windowId, inv, data) -> new AllayMapContainer(windowId, data.readEnum(InteractionHand.class), inv.player)));
     
-    public static final RegistryObject<EntityDataSerializer<NonNullList<ItemStack>>> ITEM_STACK_LIST_SERIALIZER = DATA_SERIALIZERS.register("item_stack_list", ItemStackListEntityDataSerializer::new);
+    public static final RegistryObject<EntityDataSerializer<NonNullList<ItemStack>>> ITEM_STACK_LIST_SERIALIZER = ENTITY_DATA_SERIALIZERS.register("item_stack_list", ItemStackListEntityDataSerializer::new);
     
     static void register(IEventBus bus) {
         ITEMS.register(bus);
         MEMORY_MODULE_TYPES.register(bus);
         ACTIVITIES.register(bus);
-        ENTITIES.register(bus);
+        ENTITY_TYPES.register(bus);
         SOUNDS.register(bus);
-        CONTAINERS.register(bus);
-        DATA_SERIALIZERS.register(bus);
+        MENU_TYPES.register(bus);
+        ENTITY_DATA_SERIALIZERS.register(bus);
     }
     
     private ModSetup() {}
