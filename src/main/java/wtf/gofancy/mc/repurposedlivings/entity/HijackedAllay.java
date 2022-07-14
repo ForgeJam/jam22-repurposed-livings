@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.allay.Allay;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
@@ -35,13 +36,14 @@ import net.minecraftforge.items.IItemHandler;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class HijackedAllay extends Allay {
-    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.HURT_BY);
+    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY);
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
-        MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, 
+        MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
         MemoryModuleType.IS_PANICKING, MemoryModuleType.HURT_BY, MemoryModuleType.LIKED_PLAYER,
         MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, ModSetup.ALLAY_SOURCE_TARET.get(), ModSetup.ALLAY_DELIVERY_TARET.get()
     );
@@ -60,10 +62,34 @@ public class HijackedAllay extends Allay {
     }
 
     public void setEquipmentSlot(AllayEquipment slot, ItemStack stack) {
-        this.verifyEquippedItem(stack);
+        verifyEquippedItem(stack);
         int index = slot.ordinal();
-        if (!stack.isEmpty() && !ItemStack.isSameIgnoreDurability(stack, getEquipmentSlots().set(index, stack))) {
-            this.playEquipSound(stack);
+        ItemStack result = getEquipmentSlots().set(index, stack);
+        boolean empty = stack.isEmpty() && result.isEmpty();
+        if (!empty && !ItemStack.isSameIgnoreDurability(stack, result)) {
+            playEquipSound(stack);
+        }
+    }
+
+    public void onPanicStopped() {
+        if (this.level.random.nextInt(100) < 25) {
+            onHijackActivated();
+        } else {
+            dropEquipment();
+            Allay allay = new Allay(EntityType.ALLAY, this.level);
+            allay.moveTo(this.position());
+            allay.setPersistenceRequired();
+
+            remove(RemovalReason.DISCARDED);
+            this.level.addFreshEntity(allay);
+        }
+    }
+
+    public void onHijackActivated() {
+        if (this.level instanceof ServerLevel serverLevel) {
+            this.brain.useDefaultActivity();
+            serverLevel.sendParticles(ParticleTypes.WITCH, getX(), getY() + 0.2, getZ(), 30, 0.35, 0.35, 0.35, 0);
+            this.level.playSound(null, this, ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
         }
     }
 
@@ -97,30 +123,51 @@ public class HijackedAllay extends Allay {
 
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-        return InteractionResult.PASS;
-    }
-
-    public void onPanicStopped() {
-        if (this.level.random.nextInt(100) < 25) {
-            onHijackActivated();
-        }
-        else {
+        ItemStack stack = player.getMainHandItem();
+        ItemStack map = getItemInSlot(AllayEquipment.MAP);
+        if (stack.isEmpty() && player.isShiftKeyDown()) {
             dropEquipment();
-            Allay allay = new Allay(EntityType.ALLAY, this.level);
-            allay.moveTo(this.position());
-            allay.setPersistenceRequired();
+            if (this.level instanceof ServerLevel serverLevel) {
+                Allay allay = new Allay(EntityType.ALLAY, this.level);
+                allay.moveTo(position());
+                allay.setXRot(getXRot());
+                allay.setYRot(getYRot());
+                allay.setOldPosAndRot();
+                allay.setYBodyRot(getYRot());
+                allay.setYHeadRot(getYRot());
+                allay.setPersistenceRequired();
+
+                remove(RemovalReason.DISCARDED);
+                this.level.addFreshEntity(allay);
+                serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 0.2, getZ(), 10, 0.25, 0.25, 0.25, 0);
+            }
             
-            remove(RemovalReason.DISCARDED);
-            this.level.addFreshEntity(allay);
+            return InteractionResult.SUCCESS;
         }
-    }
-    
-    public void onHijackActivated() {
-        if (this.level instanceof ServerLevel serverLevel) {
-            this.brain.useDefaultActivity();
-            serverLevel.sendParticles(ParticleTypes.WITCH, getX(), getY() + 0.2, getZ(), 30, 0.35, 0.35, 0.35, 0);
-            this.level.playSound(null, this, ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
+        else if (stack.getItem() == ModSetup.ALLAY_MAP.get() && map.isEmpty()) {
+            CompoundTag tag = stack.getTag();
+            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
+            this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), from);
+            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
+            this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), to);
+            this.brain.setActiveActivityToFirstValid(List.of(ModSetup.ALLAY_TRANSFER_ITEMS.get()));
+            
+            setEquipmentSlot(AllayEquipment.MAP, stack);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            return InteractionResult.SUCCESS;
+        } else if (stack.isEmpty() && !map.isEmpty()) {
+            this.brain.eraseMemory(ModSetup.ALLAY_SOURCE_TARET.get());
+            this.brain.eraseMemory(ModSetup.ALLAY_DELIVERY_TARET.get());
+            this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+            
+            dropItem(getItemInHand(InteractionHand.MAIN_HAND));
+            setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            
+            setEquipmentSlot(AllayEquipment.MAP, ItemStack.EMPTY);
+            player.setItemInHand(InteractionHand.MAIN_HAND, map);
+            return InteractionResult.SUCCESS;
         }
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -144,7 +191,10 @@ public class HijackedAllay extends Allay {
     @Override
     public void dropEquipment() {
         super.dropEquipment();
-        getEquipmentSlots().forEach(this::spawnAtLocation);
+        getEquipmentSlots().forEach(stack -> {
+            spawnAtLocation(stack.copy());
+            stack.setCount(0);
+        });
     }
 
     @Override
@@ -191,5 +241,11 @@ public class HijackedAllay extends Allay {
             inserted = handler.insertItem(i, inserted, false);
         }
         return inserted;
+    }
+    
+    private void dropItem(ItemStack stack) {
+        ItemEntity entity = new ItemEntity(this.level, getX(), getY(), getZ(), stack);
+        entity.setDeltaMovement(0, 0, 0);
+        this.level.addFreshEntity(entity);
     }
 }

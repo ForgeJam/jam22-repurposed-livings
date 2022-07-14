@@ -7,12 +7,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -24,8 +20,6 @@ import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.container.AllayMapContainer;
-import wtf.gofancy.mc.repurposedlivings.entity.AllayEquipment;
-import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 
@@ -47,24 +41,6 @@ public class AllayMapItem extends Item {
         ItemStack stack = new ItemStack(ModSetup.ALLAY_MAP.get(), 1);
         stack.setTag(tag);
         return stack;
-    }
-
-    @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity interactionTarget, InteractionHand usedHand) {
-        if (interactionTarget instanceof HijackedAllay allay) {
-            Brain<Allay> brain = allay.getBrain();
-            CompoundTag tag = stack.getTag();
-            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
-            brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), from);
-
-            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
-            brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), to);
-
-            allay.setEquipmentSlot(AllayEquipment.MAP, stack);
-            player.setItemInHand(usedHand, ItemStack.EMPTY);
-            return InteractionResult.SUCCESS;
-        }
-        return super.interactLivingEntity(stack, player, interactionTarget, usedHand);
     }
 
     @Override

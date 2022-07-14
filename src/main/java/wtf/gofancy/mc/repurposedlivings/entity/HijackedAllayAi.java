@@ -3,12 +3,10 @@ package wtf.gofancy.mc.repurposedlivings.entity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.behavior.AnimalPanic;
-import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
-import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.Swim;
+import net.minecraft.world.entity.ai.behavior.*;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.animal.allay.AllayAi;
@@ -22,10 +20,11 @@ public class HijackedAllayAi extends AllayAi {
 
     public static Brain<?> createBrain(Brain<HijackedAllay> brain) {
         initCoreActivity(brain);
+        initIdleActivity(brain);
         initItemTransferActivity(brain);
         initPanicActivity(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
-        brain.setDefaultActivity(ModSetup.ALLAY_TRANSFER_ITEMS.get());
+        brain.setDefaultActivity(Activity.IDLE);
         brain.useDefaultActivity();
         return brain;
     }
@@ -37,6 +36,19 @@ public class HijackedAllayAi extends AllayAi {
             new LookAtTargetSink(45, 90),
             new MoveToTargetSink()
         ));
+    }
+    
+    private static void initIdleActivity(Brain<HijackedAllay> brain) {
+        brain.addActivityWithConditions(
+            Activity.IDLE,
+            ImmutableList.of(
+                Pair.of(0, new RunSometimes<>(new SetEntityLookTarget(entity -> true, 6.0F), UniformInt.of(30, 60)))
+            ),
+            ImmutableSet.of(
+                Pair.of(ModSetup.ALLAY_SOURCE_TARET.get(), MemoryStatus.VALUE_ABSENT),
+                Pair.of(ModSetup.ALLAY_DELIVERY_TARET.get(), MemoryStatus.VALUE_ABSENT)
+            )
+        );
     }
     
     private static void initItemTransferActivity(Brain<HijackedAllay> brain) {

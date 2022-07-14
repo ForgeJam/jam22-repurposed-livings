@@ -20,18 +20,26 @@ public class MindControlDevice extends Item {
     }
 
     public boolean interactLivingEntityFirst(LivingEntity entity, ItemStack stack) {
-        if (!entity.level.isClientSide && entity.getType() == EntityType.ALLAY) {
+        if (entity.getType() == EntityType.ALLAY) {
             ((Allay) entity).dropEquipment();
-            HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), entity.level);
-            hijackedAllay.moveTo(entity.position());
-            hijackedAllay.setPersistenceRequired();
-            hijackedAllay.setEquipmentSlot(AllayEquipment.CONTROLLER, stack.copy());
-
-            entity.remove(Entity.RemovalReason.DISCARDED);
-            entity.level.addFreshEntity(hijackedAllay);
-            stack.shrink(1);
             
-            attachToAllay(hijackedAllay);
+            if (!entity.level.isClientSide) {
+                HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), entity.level);
+                hijackedAllay.moveTo(entity.position());
+                hijackedAllay.setXRot(entity.getXRot());
+                hijackedAllay.setYRot(entity.getYRot());
+                hijackedAllay.setOldPosAndRot();
+                hijackedAllay.setYBodyRot(entity.getYRot());
+                hijackedAllay.setYHeadRot(entity.getYRot());
+                hijackedAllay.setPersistenceRequired();
+                hijackedAllay.setEquipmentSlot(AllayEquipment.CONTROLLER, stack.copy());
+
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                entity.level.addFreshEntity(hijackedAllay);
+                stack.shrink(1);
+
+                attachToAllay(hijackedAllay);
+            }
             return true;
         }
         return false;
