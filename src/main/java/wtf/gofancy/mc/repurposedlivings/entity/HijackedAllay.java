@@ -33,7 +33,6 @@ import net.minecraftforge.items.IItemHandler;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -129,7 +128,7 @@ public class HijackedAllay extends Allay {
             this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), from);
             ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
             this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), to);
-            this.brain.setActiveActivityToFirstValid(List.of(ModSetup.ALLAY_TRANSFER_ITEMS.get()));
+            this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
             
             setEquipmentSlot(AllayEquipment.MAP, stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
@@ -212,6 +211,10 @@ public class HijackedAllay extends Allay {
             for (int i = 0; i < equipmentSlots.size(); ++i) {
                 equipmentSlots.set(i, ItemStack.of(list.getCompound(i)));
             }
+        }
+        
+        if (!getItemInSlot(AllayEquipment.MAP).isEmpty()) {
+            this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
         }
     }
 
