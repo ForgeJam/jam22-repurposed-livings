@@ -25,7 +25,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.RepurposedLivings;
 import wtf.gofancy.mc.repurposedlivings.container.AllayMapContainer;
-import wtf.gofancy.mc.repurposedlivings.network.UpdateAllayMapTargetSide;
+import wtf.gofancy.mc.repurposedlivings.network.Network;
+import wtf.gofancy.mc.repurposedlivings.network.UpdateAllayMapTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 
@@ -44,17 +45,17 @@ public class AllayMapScreen extends AbstractContainerScreen<AllayMapContainer> {
     protected void init() {
         super.init();
 
-        addTarget(this.leftPos + 10, this.topPos + 25 + this.font.lineHeight, UpdateAllayMapTargetSide.Target.SOURCE, this.menu::getSourceTarget, this.menu::setSourceTarget);
-        addTarget(this.leftPos + 10, this.topPos + 95 + this.font.lineHeight, UpdateAllayMapTargetSide.Target.DESTINATION, this.menu::getDestinationTarget, this.menu::setDestinationTarget);
+        addTargetSideButton(this.leftPos + 152 + 10, this.topPos + 18 + 25 + this.font.lineHeight, UpdateAllayMapTarget.Target.SOURCE, this.menu::getSourceTarget, this.menu::setSourceTarget);
+        addTargetSideButton(this.leftPos + 152 + 10, this.topPos + 18 + 95 + this.font.lineHeight, UpdateAllayMapTarget.Target.DESTINATION, this.menu::getDestinationTarget, this.menu::setDestinationTarget);
     }
     
-    private void addTarget(int x, int y, UpdateAllayMapTargetSide.Target target, Supplier<ItemTarget> getter, Consumer<ItemTarget> setter) {
-        addTargetSideButton(x + 152, y + 18, target, getter, setter);
-    }
-    
-    private void addTargetSideButton(int x, int y, UpdateAllayMapTargetSide.Target target, Supplier<ItemTarget> getter, Consumer<ItemTarget> setter) {
+    private void addTargetSideButton(int x, int y, UpdateAllayMapTarget.Target target, Supplier<ItemTarget> getter, Consumer<ItemTarget> setter) {
         addRenderableWidget(new Button(x, y, 40, 20, getTranslationForSide(getter.get().side()), button -> {
-            Direction next = this.menu.setTargetSide(target, getter, setter);
+            ItemTarget itemTarget = getter.get();
+            Direction next = Direction.values()[(itemTarget.side().ordinal() + 1) % Direction.values().length];
+            ItemTarget newTarget = itemTarget.withSide(next);
+            setter.accept(newTarget);
+            Network.INSTANCE.sendToServer(new UpdateAllayMapTarget(this.menu.getHand(), target, newTarget.serializeNbt()));
             button.setMessage(getTranslationForSide(next));
         }));
     }
@@ -107,7 +108,10 @@ public class AllayMapScreen extends AbstractContainerScreen<AllayMapContainer> {
         FormattedCharSequence sequence = text.getVisualOrderText();
         this.font.draw(poseStack, sequence, (float) (x - this.font.width(sequence) / 2), (float) y, color);
     }
-    
+
+    /**
+     * A modified version of {@link ItemRenderer#renderGuiItem(ItemStack, int, int)} that allows scaling the rendered item.
+     */
     public void renderScaledItemIntoGui(ItemStack stack, int x, int y, float scale) {
         ItemRenderer renderer = this.minecraft.getItemRenderer();
         BakedModel model = renderer.getModel(stack, null, null, 0);

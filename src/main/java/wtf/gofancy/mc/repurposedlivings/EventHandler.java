@@ -3,6 +3,7 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,6 +42,9 @@ public class EventHandler {
         }
     }
 
+    /**
+     * Lets us respond to entity interactions before {@link Entity#interact(Player, InteractionHand)} runs.
+     */
     @SubscribeEvent
     public void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         ItemStack stack = event.getItemStack();

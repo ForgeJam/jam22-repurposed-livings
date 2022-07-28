@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 
@@ -14,14 +15,14 @@ public record ItemTarget(BlockPos pos, Direction side) {
         Direction.CODEC.fieldOf("side").forGetter(ItemTarget::side)
     ).apply(instance, ItemTarget::new));
     
-    public static ItemTarget fromNbt(Tag tag) {
+    public static ItemTarget fromNbt(CompoundTag tag) {
         DataResult<ItemTarget> result = ItemTarget.CODEC.parse(NbtOps.INSTANCE, tag);
         return result.getOrThrow(false, str -> {});
     }
 
-    public Tag serializeNbt() {
+    public CompoundTag serializeNbt() {
         DataResult<Tag> result = ItemTarget.CODEC.encodeStart(NbtOps.INSTANCE, this);
-        return result.getOrThrow(false, str -> {});
+        return (CompoundTag) result.getOrThrow(false, str -> {});
     }
     
     public ItemTarget withSide(Direction side) {

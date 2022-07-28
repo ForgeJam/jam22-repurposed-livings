@@ -26,14 +26,26 @@ import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Contains information about the item source and delivery targets.
+ * Can be given to Hijacked Allays.
+ */
 public class AllayMapItem extends Item {
 
     public AllayMapItem() {
         super(new Properties().stacksTo(1));
     }
 
+    /**
+     * Complete an Allay Map draft by adding a destination target to it.
+     * 
+     * @param draft the Allay Map draft
+     * @param destPos the destination target position
+     * @param destSide the destination target side
+     * @return the completed Allay Map
+     */
     public static ItemStack createFromDraft(ItemStack draft, BlockPos destPos, Direction destSide) {
-        BlockPos fromPos = ItemTarget.fromNbt(draft.getTag().get("from")).getRelativePos();
+        BlockPos fromPos = ItemTarget.fromNbt(draft.getTag().getCompound("from")).getRelativePos();
         if (destPos.relative(destSide).closerThan(fromPos, 1)) return ItemStack.EMPTY;
 
         CompoundTag tag = draft.getTag();

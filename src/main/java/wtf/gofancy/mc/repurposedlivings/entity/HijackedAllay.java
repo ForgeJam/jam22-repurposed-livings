@@ -49,17 +49,16 @@ public class HijackedAllay extends Allay {
     public HijackedAllay(EntityType<? extends HijackedAllay> type, Level level) {
         super(type, level);
     }
+    
+    public ItemStack getItemInSlot(AllayEquipment slot) {
+        return getEquipmentSlots().get(slot.ordinal());
+    }
 
     public NonNullList<ItemStack> getEquipmentSlots() {
         return this.entityData.get(EQUIPMENT_SLOTS);
     }
 
-    public ItemStack getItemInSlot(AllayEquipment slot) {
-        return getEquipmentSlots().get(slot.ordinal());
-    }
-
     public void setEquipmentSlot(AllayEquipment slot, ItemStack stack) {
-        verifyEquippedItem(stack);
         int index = slot.ordinal();
         ItemStack result = getEquipmentSlots().set(index, stack);
         boolean empty = stack.isEmpty() && result.isEmpty();
@@ -88,11 +87,13 @@ public class HijackedAllay extends Allay {
 
     @Override
     public boolean wantsToPickUp(ItemStack stack) {
+        // Disable automatic item pickup
         return false;
     }
 
     @Override
     public boolean isDancing() {
+        // Hijacked allays can't dance
         return false;
     }
 
@@ -100,10 +101,13 @@ public class HijackedAllay extends Allay {
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack stack = player.getMainHandItem();
         ItemStack map = getItemInSlot(AllayEquipment.MAP);
+        // Un-hijack allay by shift-clicking it with an empty hand
         if (stack.isEmpty() && player.isShiftKeyDown()) {
             dropEquipment();
             if (this.level instanceof ServerLevel serverLevel) {
+                // Replace hijacked allay with a normal one
                 Allay allay = new Allay(EntityType.ALLAY, this.level);
+                // Copy position and body rotation
                 allay.moveTo(position());
                 allay.setXRot(getXRot());
                 allay.setYRot(getYRot());
@@ -116,9 +120,9 @@ public class HijackedAllay extends Allay {
                 this.level.addFreshEntity(allay);
                 serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 0.2, getZ(), 10, 0.25, 0.25, 0.25, 0);
             }
-            
             return InteractionResult.SUCCESS;
         }
+        // Give the Allay an Allay Map
         else if (stack.getItem() == ModSetup.ALLAY_MAP.get() && map.isEmpty()) {
             CompoundTag tag = stack.getTag();
             ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
@@ -130,7 +134,9 @@ public class HijackedAllay extends Allay {
             setEquipmentSlot(AllayEquipment.MAP, stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             return InteractionResult.SUCCESS;
-        } else if (stack.isEmpty() && !map.isEmpty()) {
+        }
+        // Take an Allay Map from the Allay
+        else if (stack.isEmpty() && !map.isEmpty()) {
             this.brain.eraseMemory(ModSetup.ALLAY_SOURCE_TARET.get());
             this.brain.eraseMemory(ModSetup.ALLAY_DELIVERY_TARET.get());
             this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
@@ -150,15 +156,21 @@ public class HijackedAllay extends Allay {
         super.aiStep();
         ItemStack stackInHand = getItemInHand(InteractionHand.MAIN_HAND);
         if (stackInHand.isEmpty()) {
+            // Search for the source container in range
             getTargetItemHandler(ModSetup.ALLAY_SOURCE_TARET.get(), 2)
+                // Try extracting the first item
                 .flatMap(itemHandler -> IntStream.range(0, itemHandler.getSlots())
                     .mapToObj(i -> itemHandler.extractItem(i, Integer.MAX_VALUE, false))
                     .filter(stack -> !stack.isEmpty())
                     .findFirst())
+                // Add it to the allay's hand
                 .ifPresent(stack -> setItemInHand(InteractionHand.MAIN_HAND, stack));
         } else {
+            // Search for the destination container in range
             getTargetItemHandler(ModSetup.ALLAY_DELIVERY_TARET.get(), 1)
+                // Insert the item from our hand into the container
                 .map(itemHandler -> insertStack(itemHandler, stackInHand))
+                // Keep the remainder (if any) in our hand to insert when more space becomes available
                 .ifPresent(stack -> setItemInHand(InteractionHand.MAIN_HAND, stack));
         }
     }
@@ -166,6 +178,8 @@ public class HijackedAllay extends Allay {
     @Override
     public void dropEquipment() {
         super.dropEquipment();
+        
+        // Drop all items from equipment slots
         getEquipmentSlots().forEach(stack -> {
             spawnAtLocation(stack.copy());
             stack.setCount(0);
@@ -176,6 +190,7 @@ public class HijackedAllay extends Allay {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
 
+        // Save equipment slots to NBT
         ListTag list = new ListTag();
         for (ItemStack stack : getEquipmentSlots()) {
             CompoundTag stackTag = new CompoundTag();
@@ -189,6 +204,7 @@ public class HijackedAllay extends Allay {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         
+        // Load equipment slots from NBT
         if (tag.contains("EquipmentSlots", Tag.TAG_LIST)) {
             ListTag list = tag.getList("EquipmentSlots", Tag.TAG_COMPOUND);
 
@@ -199,6 +215,14 @@ public class HijackedAllay extends Allay {
         }
     }
 
+    /**
+     * Find an IItemHandler at a target position with a range limit.
+     * Additionally, the Allay must be looking at the target to emulate a real container interation.
+     * 
+     * @param memory the ItemTarget value holder
+     * @param range the range to search in
+     * @return optional IItemHandler
+     */
     private Optional<IItemHandler> getTargetItemHandler(MemoryModuleType<ItemTarget> memory, double range) {
         return this.brain.getMemory(memory)
             .filter(target -> {
@@ -210,6 +234,13 @@ public class HijackedAllay extends Allay {
             .flatMap(be -> be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).resolve());
     }
 
+    /**
+     * Insert an ItemStack into an IItemHandler, returning the remainder if there's any.
+     * 
+     * @param handler the container to insert into
+     * @param stack the stack to insert
+     * @return the remainer, or an empty stack if there's none
+     */
     private ItemStack insertStack(IItemHandler handler, ItemStack stack) {
         ItemStack inserted = stack;
         for (int i = 0; i < handler.getSlots(); i++) {
@@ -217,7 +248,12 @@ public class HijackedAllay extends Allay {
         }
         return inserted;
     }
-    
+
+    /**
+     * Drop an item at the Allay's location with no delta movement.
+     * 
+     * @param stack the item to drop
+     */
     private void dropItem(ItemStack stack) {
         ItemEntity entity = new ItemEntity(this.level, getX(), getY(), getZ(), stack);
         entity.setDeltaMovement(0, 0, 0);

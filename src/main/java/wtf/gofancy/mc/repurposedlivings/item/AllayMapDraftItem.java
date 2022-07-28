@@ -18,12 +18,21 @@ import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 
 import java.util.List;
 
+/**
+ * A partial allay map that only contains the source target position.
+ * It can be completed by shift-right-clicking another container.
+ */
 public class AllayMapDraftItem extends Item {
 
     public AllayMapDraftItem() {
         super(new Item.Properties().stacksTo(1));
     }
 
+    /**
+     * @param pos source target pos
+     * @param side source target side
+     * @return a new allay map draft with the specified source target
+     */
     public static ItemStack create(BlockPos pos, Direction side) {
         CompoundTag tag = new CompoundTag();
         tag.put("from", new ItemTarget(pos, side).serializeNbt());
@@ -36,6 +45,8 @@ public class AllayMapDraftItem extends Item {
     public InteractionResult useOn(UseOnContext context) {
         BlockPos pos = context.getClickedPos();
         Direction side = context.getClickedFace();
+        // If the target block is a valid item container, replace this item in the
+        // player's hand with a complete Allay Map using the target as the destination
         if (ModUtil.isContainer(context.getLevel(), pos, side)) {
             ItemStack draft = context.getItemInHand();
             ItemStack stack = AllayMapItem.createFromDraft(draft, pos, side);

@@ -14,6 +14,10 @@ import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.entity.AllayEquipment;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 
+/**
+ * Hijacks Allays to enable item transfer functionality.
+ * Can only be applied to dancing Allays.
+ */
 public class MindControlDevice extends Item {
 
     public MindControlDevice(Properties properties) {
@@ -21,11 +25,13 @@ public class MindControlDevice extends Item {
     }
 
     public InteractionResult interactLivingEntityFirst(LivingEntity entity, ItemStack stack) {
+        // If applied on an Allay at a valid time, replace it with our modified variant
         if (entity.getType() == EntityType.ALLAY && canAttachToAllay((Allay) entity)) {
             ((Allay) entity).dropEquipment();
             
             if (entity.level instanceof ServerLevel serverLevel) {
                 HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), entity.level);
+                // Copy position and body rotation
                 hijackedAllay.moveTo(entity.position());
                 hijackedAllay.setXRot(entity.getXRot());
                 hijackedAllay.setYRot(entity.getYRot());
@@ -39,6 +45,7 @@ public class MindControlDevice extends Item {
                 entity.level.addFreshEntity(hijackedAllay);
                 stack.shrink(1);
                 
+                // Audiovisual feedback
                 serverLevel.sendParticles(ParticleTypes.WITCH, hijackedAllay.getX(), hijackedAllay.getY() + 0.2, hijackedAllay.getZ(), 30, 0.35, 0.35, 0.35, 0);
                 serverLevel.playSound(null, hijackedAllay, ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
             }
@@ -48,6 +55,7 @@ public class MindControlDevice extends Item {
     }
 
     public boolean canAttachToAllay(Allay allay) {
+        // Can only hijack dancing allays
         return allay.isDancing();
     }
 }

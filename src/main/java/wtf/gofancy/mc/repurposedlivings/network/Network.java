@@ -22,10 +22,10 @@ public final class Network {
         int id = 0;
 
         INSTANCE.registerMessage(id++,
-            UpdateAllayMapTargetSide.class,
-            UpdateAllayMapTargetSide::encode,
-            UpdateAllayMapTargetSide::decode,
-            UpdateAllayMapTargetSide::processServerPacket,
+            UpdateAllayMapTarget.class,
+            UpdateAllayMapTarget::encode,
+            UpdateAllayMapTarget::decode,
+            UpdateAllayMapTarget::processServerPacket,
             Optional.of(NetworkDirection.PLAY_TO_SERVER)
         );
     }
