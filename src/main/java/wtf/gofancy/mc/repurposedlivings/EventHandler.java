@@ -48,8 +48,9 @@ public class EventHandler {
         Item item = stack.getItem();
         
         if (item instanceof MindControlDevice controller && target instanceof LivingEntity livingEntity) {
-            if (controller.interactLivingEntityFirst(livingEntity, stack)) {
-                event.setCancellationResult(InteractionResult.SUCCESS);
+            InteractionResult result = controller.interactLivingEntityFirst(livingEntity, stack);
+            if (result != InteractionResult.PASS) {
+                event.setCancellationResult(result);
                 event.setCanceled(true);
             }
         }

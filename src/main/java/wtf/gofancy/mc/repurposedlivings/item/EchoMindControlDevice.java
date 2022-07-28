@@ -1,6 +1,6 @@
 package wtf.gofancy.mc.repurposedlivings.item;
 
-import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
+import net.minecraft.world.entity.animal.allay.Allay;
 
 public class EchoMindControlDevice extends MindControlDevice {
 
@@ -9,7 +9,7 @@ public class EchoMindControlDevice extends MindControlDevice {
     }
 
     @Override
-    public void attachToAllay(HijackedAllay allay) {
-        allay.onHijackActivated();
+    public boolean canAttachToAllay(Allay allay) {
+        return true;
     }
 }

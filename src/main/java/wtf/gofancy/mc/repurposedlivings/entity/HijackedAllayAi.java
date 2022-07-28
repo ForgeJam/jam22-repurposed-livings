@@ -13,7 +13,6 @@ import net.minecraft.world.entity.animal.allay.AllayAi;
 import net.minecraft.world.entity.schedule.Activity;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.entity.behavior.GoToTargetPosition;
-import wtf.gofancy.mc.repurposedlivings.entity.behavior.HijackPanic;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
 public class HijackedAllayAi extends AllayAi {
@@ -22,7 +21,6 @@ public class HijackedAllayAi extends AllayAi {
         initCoreActivity(brain);
         initIdleActivity(brain);
         initItemTransferActivity(brain);
-        initPanicActivity(brain);
         brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         brain.useDefaultActivity();
@@ -63,9 +61,5 @@ public class HijackedAllayAi extends AllayAi {
                 Pair.of(ModSetup.ALLAY_DELIVERY_TARET.get(), MemoryStatus.VALUE_PRESENT)
             )
         );
-    }
-    
-    private static void initPanicActivity(Brain<HijackedAllay> brain) {
-        brain.addActivity(Activity.PANIC, 0, ImmutableList.of(new HijackPanic(2.5F)));
     }
 }

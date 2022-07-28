@@ -1,17 +1,18 @@
 package wtf.gofancy.mc.repurposedlivings.item;
 
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.allay.Allay;
-import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.entity.AllayEquipment;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
-
-import java.util.List;
 
 public class MindControlDevice extends Item {
 
@@ -19,11 +20,11 @@ public class MindControlDevice extends Item {
         super(properties.stacksTo(1));
     }
 
-    public boolean interactLivingEntityFirst(LivingEntity entity, ItemStack stack) {
-        if (entity.getType() == EntityType.ALLAY) {
+    public InteractionResult interactLivingEntityFirst(LivingEntity entity, ItemStack stack) {
+        if (entity.getType() == EntityType.ALLAY && canAttachToAllay((Allay) entity)) {
             ((Allay) entity).dropEquipment();
             
-            if (!entity.level.isClientSide) {
+            if (entity.level instanceof ServerLevel serverLevel) {
                 HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), entity.level);
                 hijackedAllay.moveTo(entity.position());
                 hijackedAllay.setXRot(entity.getXRot());
@@ -37,15 +38,16 @@ public class MindControlDevice extends Item {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 entity.level.addFreshEntity(hijackedAllay);
                 stack.shrink(1);
-
-                attachToAllay(hijackedAllay);
+                
+                serverLevel.sendParticles(ParticleTypes.WITCH, hijackedAllay.getX(), hijackedAllay.getY() + 0.2, hijackedAllay.getZ(), 30, 0.35, 0.35, 0.35, 0);
+                serverLevel.playSound(null, hijackedAllay, ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
             }
-            return true;
+            return InteractionResult.SUCCESS;
         }
-        return false;
+        return InteractionResult.FAIL;
     }
 
-    public void attachToAllay(HijackedAllay allay) {
-        allay.getBrain().setActiveActivityToFirstValid(List.of(Activity.PANIC));
+    public boolean canAttachToAllay(Allay allay) {
+        return allay.isDancing();
     }
 }

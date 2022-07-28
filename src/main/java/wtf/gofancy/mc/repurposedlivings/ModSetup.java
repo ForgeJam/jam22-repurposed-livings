@@ -44,13 +44,12 @@ public final class ModSetup {
             return new ItemStack(ALLAY_MAP.get());
         }
     };
-    private static final Item.Properties ITEM_PROPERTIES = new Item.Properties().tab(REPURPOSED_LIVINGS_TAB);
     
     public static final RegistryObject<Item> ALLAY_MAP = ITEMS.register("allay_map", AllayMapItem::new);
     public static final RegistryObject<Item> ALLAY_MAP_DRAFT = ITEMS.register("allay_map_draft", AllayMapDraftItem::new);
-    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDevice(ITEM_PROPERTIES));
-    public static final RegistryObject<Item> ECHO_MIND_CONTROL_DEVICE = ITEMS.register("echo_mind_control_device", () -> new EchoMindControlDevice(ITEM_PROPERTIES));
-    public static final RegistryObject<Item> ECHO_PEARL = ITEMS.register("echo_pearl", () -> new Item(ITEM_PROPERTIES));
+    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDevice(itemProperties()));
+    public static final RegistryObject<Item> ECHO_MIND_CONTROL_DEVICE = ITEMS.register("echo_mind_control_device", () -> new EchoMindControlDevice(itemProperties()));
+    public static final RegistryObject<Item> ECHO_PEARL = ITEMS.register("echo_pearl", () -> new Item(itemProperties()));
     
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
@@ -78,6 +77,10 @@ public final class ModSetup {
         SOUNDS.register(bus);
         MENU_TYPES.register(bus);
         ENTITY_DATA_SERIALIZERS.register(bus);
+    }
+    
+    private static Item.Properties itemProperties() {
+        return new Item.Properties().tab(REPURPOSED_LIVINGS_TAB);
     }
     
     private ModSetup() {}

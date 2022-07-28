@@ -13,7 +13,7 @@ java {
 }
 
 minecraft {
-    mappings("parchment", "1.18.2-2022.07.03-1.19")
+    mappings("parchment", "1.18.2-2022.07.03-1.19.1")
     
     accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
     
@@ -74,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    minecraft(group = "net.minecraftforge", name = "forge", version = "1.19-41.0.98")
+    minecraft(group = "net.minecraftforge", name = "forge", version = "1.19.1-42.0.0")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
@@ -92,7 +92,7 @@ tasks {
         )
     }
     
-    withType(JavaCompile::class.java) {
+    withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
 }

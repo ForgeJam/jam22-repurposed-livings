@@ -11,7 +11,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -26,8 +25,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -71,28 +68,6 @@ public class HijackedAllay extends Allay {
         }
     }
 
-    public void onPanicStopped() {
-        if (this.level.random.nextInt(100) < 25) {
-            onHijackActivated();
-        } else {
-            dropEquipment();
-            Allay allay = new Allay(EntityType.ALLAY, this.level);
-            allay.moveTo(this.position());
-            allay.setPersistenceRequired();
-
-            remove(RemovalReason.DISCARDED);
-            this.level.addFreshEntity(allay);
-        }
-    }
-
-    public void onHijackActivated() {
-        if (this.level instanceof ServerLevel serverLevel) {
-            this.brain.useDefaultActivity();
-            serverLevel.sendParticles(ParticleTypes.WITCH, getX(), getY() + 0.2, getZ(), 30, 0.35, 0.35, 0.35, 0);
-            this.level.playSound(null, this, ModSetup.MIND_CONTROL_DEVICE_ATTACH_SOUND.get(), SoundSource.MASTER, 1, 1);
-        }
-    }
-
     @Override
     protected Brain.Provider<Allay> brainProvider() {
         return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
@@ -115,9 +90,9 @@ public class HijackedAllay extends Allay {
     public boolean wantsToPickUp(ItemStack stack) {
         return false;
     }
-    
+
     @Override
-    public boolean shouldListen(ServerLevel level, GameEventListener listener, BlockPos pos, GameEvent event, GameEvent.Context context) {
+    public boolean isDancing() {
         return false;
     }
 

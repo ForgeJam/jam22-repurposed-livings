@@ -95,7 +95,7 @@ public class AllayMapScreen extends AbstractContainerScreen<AllayMapContainer> {
         this.font.draw(poseStack, ModUtil.getContainerTranslation("allay_map", "pos.y", target.pos().getY()), x + 40, y + 15 + this.font.lineHeight * 2, 4210752);
         this.font.draw(poseStack, ModUtil.getContainerTranslation("allay_map", "pos.z", target.pos().getZ()), x + 40, y + 15 + this.font.lineHeight * 3, 4210752);
         
-        this.font.draw(poseStack, ModUtil.getItemTranslation(ModSetup.ALLAY_MAP.get(), "side"), x + 152, y + 15, 4210752);
+        this.font.draw(poseStack, ModUtil.getItemTranslation(ModSetup.ALLAY_MAP.get(), "side"), x + 152, y + 13, 4210752);
     }
     
     @Override
