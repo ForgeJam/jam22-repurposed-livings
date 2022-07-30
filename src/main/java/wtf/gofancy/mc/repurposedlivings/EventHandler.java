@@ -25,13 +25,14 @@ import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
+import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 public class EventHandler {
 
     @SubscribeEvent
     public void onAttachCapabilities(final AttachCapabilitiesEvent<Level> event) {
         event.addCapability(
-                new ResourceLocation(RepurposedLivings.MODID, "allay_map_data"),
+                RepurposedLivings.rl("allay_map_data"),
                 new AllayMapDataStorageProvider()
         );
     }
@@ -41,7 +42,7 @@ public class EventHandler {
         if (!(event.getObject() instanceof ServerPlayer)) return;
 
         event.addCapability(
-                new ResourceLocation(RepurposedLivings.MODID, "allay_map_data_sync_flag"),
+                RepurposedLivings.rl("allay_map_data_sync_flag"),
                 new AllayMapDataSyncFlagProvider()
         );
     }
@@ -92,7 +93,8 @@ public class EventHandler {
                         .setSource(new ItemTarget(pos, side));
 
                 player.setItemInHand(event.getHand(), draftStack);
-                player.displayClientMessage(ModUtil.getItemTranslation(draftStack.getItem(), "complete_draft").withStyle(ChatFormatting.AQUA), true);
+                player.displayClientMessage(TranslationUtils.message("allay_map_complete_draft")
+                        .withStyle(ChatFormatting.AQUA), true);
 
                 event.setCancellationResult(InteractionResult.CONSUME);
                 event.setCanceled(true);

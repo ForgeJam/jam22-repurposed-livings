@@ -39,6 +39,7 @@ import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
+import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -166,7 +167,7 @@ public class HijackedAllay extends Allay {
 
             if (!data.isComplete()) {
                 if (player instanceof ServerPlayer serverPlayer) {
-                    serverPlayer.displayClientMessage(ModUtil.getTranslation("incomplete").withStyle(ChatFormatting.RED), true);
+                    serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete").withStyle(ChatFormatting.RED), true);
                 }
                 return InteractionResult.CONSUME;
             }

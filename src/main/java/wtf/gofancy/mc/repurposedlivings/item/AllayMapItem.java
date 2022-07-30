@@ -1,8 +1,8 @@
 package wtf.gofancy.mc.repurposedlivings.item;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -22,9 +22,9 @@ import wtf.gofancy.mc.repurposedlivings.network.AllayMapDataUpdateMessage;
 import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
+import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 public class AllayMapItem extends MapItem {
 
@@ -51,6 +51,12 @@ public class AllayMapItem extends MapItem {
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
 
+        if (!isAdvanced.isAdvanced()) {
+            // automatically added by super if advanced
+            tooltipComponents.add(Component.translatable("filled_map.id", MapItem.getMapId(stack))
+                    .withStyle(ChatFormatting.GRAY));
+        }
+
         final var data = level.getCapability(Capabilities.ALLAY_MAP_DATA)
                 .resolve()
                 .orElseThrow()
@@ -60,30 +66,28 @@ public class AllayMapItem extends MapItem {
         final var source = data.getSource();
         final var destination = data.getDestination();
 
-        if (source.isEmpty() || destination.isEmpty()) {
-            tooltipComponents.add(ModUtil.getItemTranslation(this, "complete_draft").withStyle(ChatFormatting.AQUA));
+        if (data.isComplete()) {
+            tooltipComponents.add(TranslationUtils.tooltip(this, "complete").withStyle(ChatFormatting.GOLD));
+        } else {
+            tooltipComponents.add(TranslationUtils.tooltip(this, "incomplete").withStyle(ChatFormatting.AQUA));
         }
-        source.ifPresent(itemTarget -> tooltipComponents.add(ModUtil.getTargetTranslation(
-                "source",
-                itemTarget
-        )));
-        destination.ifPresent(itemTarget -> tooltipComponents.add(ModUtil.getTargetTranslation(
-                "destination",
-                itemTarget
-        )));
+        source.ifPresent(target -> tooltipComponents.add(this.composeTargetComponent("source", target)));
+        destination.ifPresent(target -> tooltipComponents.add(this.composeTargetComponent("destination", target)));
     }
 
-    private boolean ensureTargetsLoaded(Level level, Player player, ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag();
-        if (tag.contains("from") && tag.contains("to")) {
-            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
-            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
-
-            boolean loaded = Stream.of(from.pos(), from.getRelativePos(), to.pos(), to.getRelativePos()).allMatch(level::isLoaded);
-            if (!loaded) player.displayClientMessage(ModUtil.getItemTranslation(this, "out_of_range").withStyle(ChatFormatting.RED), true);
-            else return true;
-        }
-        return false;
+    private MutableComponent composeTargetComponent(final String name, final ItemTarget target) {
+        return TranslationUtils.tooltip(this, "target_" + name)
+                .append(TranslationUtils.tooltip(
+                        this,
+                        "target_pos",
+                        target.pos().getX(),
+                        target.pos().getY(),
+                        target.pos().getZ()
+                ))
+                .append(", ")
+                .append(TranslationUtils.tooltip(this, "target_side"))
+                .append(TranslationUtils.tooltip(this, "direction." + target.side().getName()))
+                .withStyle(ChatFormatting.DARK_GRAY);
     }
 
     @Override

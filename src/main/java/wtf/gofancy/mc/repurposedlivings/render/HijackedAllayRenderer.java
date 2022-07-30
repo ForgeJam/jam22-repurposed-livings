@@ -11,8 +11,8 @@ import wtf.gofancy.mc.repurposedlivings.entity.AllayEquipment;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 
 public class HijackedAllayRenderer extends AllayRenderer {
-    private static final ResourceLocation MIND_CONTROL_DEVICE_TEXTURE = new ResourceLocation(RepurposedLivings.MODID, "textures/entity/mind_control_device.png");
-    private static final ResourceLocation ECHO_MIND_CONTROL_DEVICE_TEXTURE = new ResourceLocation(RepurposedLivings.MODID, "textures/entity/echo_mind_control_device.png");
+    private static final ResourceLocation MIND_CONTROL_DEVICE_TEXTURE = RepurposedLivings.rl( "textures/entity/mind_control_device.png");
+    private static final ResourceLocation ECHO_MIND_CONTROL_DEVICE_TEXTURE = RepurposedLivings.rl("textures/entity/echo_mind_control_device.png");
 
     public HijackedAllayRenderer(EntityRendererProvider.Context context) {
         super(context);

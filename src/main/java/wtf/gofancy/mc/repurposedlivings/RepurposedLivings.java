@@ -1,6 +1,7 @@
 package wtf.gofancy.mc.repurposedlivings;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -17,6 +18,10 @@ import wtf.gofancy.mc.repurposedlivings.network.Network;
 public class RepurposedLivings {
     public static final String MODID = "repurposedlivings";
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static ResourceLocation rl(final String path) {
+        return new ResourceLocation(MODID, path);
+    }
 
     public RepurposedLivings() {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();

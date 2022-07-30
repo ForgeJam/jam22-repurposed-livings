@@ -9,6 +9,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
+import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.Optional;
 
@@ -80,7 +81,7 @@ public class AllayMapData {
                     source.pos().getX(),
                     source.pos().getZ(),
                     0.0,
-                    ModUtil.getMapTranslation("source")
+                    TranslationUtils.generic("source")
             );
         }
         if (this.destination != null) {
@@ -91,7 +92,7 @@ public class AllayMapData {
                     destination.pos().getX(),
                     destination.pos().getZ(),
                     0.0,
-                    ModUtil.getMapTranslation("destination")
+                    TranslationUtils.generic("destination")
             );
         }
 
