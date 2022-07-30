@@ -13,9 +13,8 @@ import java.util.Optional;
 
 public class AllayMapDataStorage implements AllayMapDataCapability {
 
-    public static final Codec<Map<Integer, AllayMapData>> CODEC = Codec.unboundedMap(Codec.INT, AllayMapData.CODEC);
+    public static final Codec<Map<Integer, AllayMapData>> CODEC = Codec.unboundedMap(Codec.STRING.xmap(Integer::valueOf, String::valueOf), AllayMapData.CODEC);
 
-    // we have to wrap it anyway, because Codecs return immutable maps
     private Map<Integer, AllayMapData> storage;
 
     public AllayMapDataStorage() {

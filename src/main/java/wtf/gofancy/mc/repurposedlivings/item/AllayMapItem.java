@@ -72,15 +72,20 @@ public class AllayMapItem extends MapItem {
                 .get(stack)
                 .orElseThrow();
 
-        final boolean isDraft = data.getDestination() == null;
+        final var source = data.getSource();
+        final var destination = data.getDestination();
 
-        if (isDraft) {
+        if (source.isEmpty() || destination.isEmpty()) {
             tooltipComponents.add(ModUtil.getItemTranslation(this, "complete_draft").withStyle(ChatFormatting.AQUA));
-            tooltipComponents.add(ModUtil.getTargetTranslation("source", data.getSource()));
-        } else {
-            tooltipComponents.add(ModUtil.getTargetTranslation("source", data.getSource()));
-            tooltipComponents.add(ModUtil.getTargetTranslation("destination", data.getDestination()));
         }
+        source.ifPresent(itemTarget -> tooltipComponents.add(ModUtil.getTargetTranslation(
+                "source",
+                itemTarget
+        )));
+        destination.ifPresent(itemTarget -> tooltipComponents.add(ModUtil.getTargetTranslation(
+                "destination",
+                itemTarget
+        )));
     }
 
     private boolean ensureTargetsLoaded(Level level, Player player, ItemStack stack) {
@@ -111,13 +116,13 @@ public class AllayMapItem extends MapItem {
                 .get(context.getItemInHand())
                 .orElseThrow();
 
-        if (data.getSource() == null) {
+        if (data.getSource().isEmpty()) {
             if (ModUtil.isContainer(level, pos, side)) {
                 data.setSource(new ItemTarget(pos, side));
                 return InteractionResult.SUCCESS;
             }
         }
-        if (data.getDestination() == null) {
+        if (data.getDestination().isEmpty()) {
             if (ModUtil.isContainer(level, pos, side)) {
                 data.setDestination(new ItemTarget(pos, side));
                 return InteractionResult.SUCCESS;

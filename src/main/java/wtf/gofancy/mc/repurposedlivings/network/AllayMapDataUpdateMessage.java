@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public record AllayMapDataUpdateMessage(int mapId, AllayMapData data) {
 
     public void encode(final FriendlyByteBuf buf) {
-        final CompoundTag nbt = new CompoundTag();
+        final var nbt = new CompoundTag();
         nbt.put("data", AllayMapData.CODEC.encodeStart(NbtOps.INSTANCE, data).getOrThrow(false, str -> {}));
 
         buf.writeInt(mapId);
@@ -22,12 +22,9 @@ public record AllayMapDataUpdateMessage(int mapId, AllayMapData data) {
 
     public static AllayMapDataUpdateMessage decode(final FriendlyByteBuf buf) {
         final int mapId = buf.readInt();
-        final CompoundTag nbt = buf.readNbt();
-
-        return new AllayMapDataUpdateMessage(
-                mapId,
-                AllayMapData.CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, str -> {})
-        );
+        final var nbt = buf.readNbt().get("data");
+        final var data = AllayMapData.CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, str -> {});
+        return new AllayMapDataUpdateMessage(mapId, data);
     }
 
     public void processClientbound(Supplier<NetworkEvent.Context> ctx) {

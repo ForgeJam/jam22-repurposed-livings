@@ -12,8 +12,8 @@ import java.util.Optional;
 public class AllayMapData {
 
     public static final Codec<AllayMapData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemTarget.CODEC.optionalFieldOf("source", null).forGetter(AllayMapData::getSource),
-            ItemTarget.CODEC.optionalFieldOf("destination", null).forGetter(AllayMapData::getDestination)
+            ItemTarget.CODEC.optionalFieldOf("source").forGetter(AllayMapData::getSource),
+            ItemTarget.CODEC.optionalFieldOf("destination").forGetter(AllayMapData::getDestination)
     ).apply(instance, AllayMapData::new));
 
     public AllayMapData() {
@@ -22,10 +22,10 @@ public class AllayMapData {
         this.destination = null;
     }
 
-    private AllayMapData(ItemTarget source, ItemTarget destination) {
+    private AllayMapData(Optional<ItemTarget> source, Optional<ItemTarget> destination) {
         this.changed = true;
-        this.source = source;
-        this.destination = destination;
+        this.source = source.orElse(null);
+        this.destination = destination.orElse(null);
     }
 
     private boolean changed;
@@ -33,8 +33,8 @@ public class AllayMapData {
     private ItemTarget source;
     private ItemTarget destination;
 
-    public ItemTarget getSource() {
-        return source;
+    public Optional<ItemTarget> getSource() {
+        return Optional.ofNullable(this.source);
     }
 
     public void setSource(final ItemTarget source) {
@@ -42,8 +42,8 @@ public class AllayMapData {
         this.setChanged();
     }
 
-    public ItemTarget getDestination() {
-        return destination;
+    public Optional<ItemTarget> getDestination() {
+        return Optional.ofNullable(this.destination);
     }
 
     public void setDestination(ItemTarget destination) {

@@ -32,8 +32,8 @@ public class AllayMapContainer extends AbstractContainerMenu {
                 .get(stack)
                 .orElseThrow();
 
-        this.sourceTarget = data.getSource();
-        this.destinationTarget = data.getDestination();
+        this.sourceTarget = data.getSource().orElseThrow();
+        this.destinationTarget = data.getDestination().orElseThrow();
     }
 
     public ItemTarget getSourceTarget() {
