@@ -3,6 +3,7 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,13 +12,25 @@ import net.minecraft.world.item.EmptyMapItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import wtf.gofancy.mc.repurposedlivings.item.AllayMapDraftItem;
+import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataStorageProvider;
+import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
+import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 
 public class EventHandler {
+
+    @SubscribeEvent
+    public void onAttachCapabilities(final AttachCapabilitiesEvent<Level> event) {
+        event.addCapability(
+                new ResourceLocation(RepurposedLivings.MODID, "allay_map_data"),
+                new AllayMapDataStorageProvider()
+        );
+    }
 
     @SubscribeEvent
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
@@ -31,7 +44,15 @@ public class EventHandler {
             Item item = stack.getItem();
 
             if (item instanceof EmptyMapItem) {
-                ItemStack draftStack = AllayMapDraftItem.create(pos, side);
+                ItemStack draftStack = AllayMapItem.create(level, pos.getX(), pos.getZ());
+
+                level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                        .resolve()
+                        .orElseThrow()
+                        .get(draftStack)
+                        .orElseThrow()
+                        .setSource(new ItemTarget(pos, side));
+
                 player.setItemInHand(event.getHand(), draftStack);
                 player.displayClientMessage(ModUtil.getItemTranslation(draftStack.getItem(), "complete_draft").withStyle(ChatFormatting.AQUA), true);
 

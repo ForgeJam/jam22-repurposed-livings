@@ -43,5 +43,9 @@ public final class ModUtil {
             .append(getItemTranslation(ModSetup.ALLAY_MAP.get(), "side." + target.side().getName()));
     }
 
+    public static MutableComponent getMapTranslation(String key) {
+        return Component.translatable(String.join(".", RepurposedLivings.MODID, "map", key));
+    }
+
     private ModUtil() {}
 }

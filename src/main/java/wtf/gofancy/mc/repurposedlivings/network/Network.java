@@ -28,6 +28,14 @@ public final class Network {
             UpdateAllayMapTargetSide::processServerPacket,
             Optional.of(NetworkDirection.PLAY_TO_SERVER)
         );
+
+        INSTANCE.registerMessage(id++,
+                AllayMapDataUpdateMessage.class,
+                AllayMapDataUpdateMessage::encode,
+                AllayMapDataUpdateMessage::decode,
+                AllayMapDataUpdateMessage::processClientbound,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT)
+        );
     }
 
     private Network() {}

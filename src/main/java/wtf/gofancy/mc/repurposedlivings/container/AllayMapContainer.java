@@ -1,12 +1,12 @@
 package wtf.gofancy.mc.repurposedlivings.container;
 
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
+import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.network.UpdateAllayMapTargetSide;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
@@ -22,12 +22,18 @@ public class AllayMapContainer extends AbstractContainerMenu {
 
     public AllayMapContainer(int containerId, InteractionHand hand, Player player) {
         super(ModSetup.POWERGEN_CONTAINER.get(), containerId);
-        
+
         this.hand = hand;
         ItemStack stack = player.getItemInHand(hand);
-        CompoundTag tag = stack.getTag();
-        this.sourceTarget = ItemTarget.fromNbt(tag.getCompound("from"));
-        this.destinationTarget = ItemTarget.fromNbt(tag.getCompound("to"));
+
+        final var data = player.level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                .resolve()
+                .orElseThrow()
+                .get(stack)
+                .orElseThrow();
+
+        this.sourceTarget = data.getSource();
+        this.destinationTarget = data.getDestination();
     }
 
     public ItemTarget getSourceTarget() {

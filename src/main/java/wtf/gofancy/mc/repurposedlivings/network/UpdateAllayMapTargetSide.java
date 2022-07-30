@@ -8,8 +8,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
+import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
+import wtf.gofancy.mc.repurposedlivings.item.AllayMapData;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public record UpdateAllayMapTargetSide(InteractionHand hand, Target target, Direction side) {
@@ -31,24 +37,33 @@ public record UpdateAllayMapTargetSide(InteractionHand hand, Target target, Dire
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             ItemStack stack = player.getItemInHand(this.hand);
-            CompoundTag tag = stack.getTag();
-            if (stack.getItem() == ModSetup.ALLAY_MAP.get() && tag.contains(this.target.nbtName)) {
-                ItemTarget target = ItemTarget.fromNbt(tag.getCompound(this.target.nbtName));
-                ItemTarget newTarget = new ItemTarget(target.pos(), this.side);
-                tag.put(this.target.nbtName, newTarget.serializeNbt());
+
+            if (stack.getItem() == ModSetup.ALLAY_MAP.get()) {
+                final var data = player.level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                        .resolve()
+                        .orElseThrow()
+                        .get(stack)
+                        .orElseThrow();
+
+                final var currentTarget = this.target.getter.apply(data);
+                final var newTarget = new ItemTarget(currentTarget.pos(), this.side);
+
+                this.target.setter.accept(data, newTarget);
             }
         });
         ctx.get().setPacketHandled(true);
     }
-    
-    public enum Target {
-        SOURCE("from"),
-        DESTINATION("to");
-        
-        public final String nbtName;
 
-        Target(String nbtName) {
-            this.nbtName = nbtName;
+    public enum Target {
+        SOURCE(AllayMapData::getSource, AllayMapData::setSource),
+        DESTINATION(AllayMapData::getDestination, AllayMapData::setDestination);
+
+        public final Function<AllayMapData, ItemTarget> getter;
+        public final BiConsumer<AllayMapData, ItemTarget> setter;
+
+        Target(Function<AllayMapData, ItemTarget> getter, BiConsumer<AllayMapData, ItemTarget> setter) {
+            this.getter = getter;
+            this.setter = setter;
         }
     }
 }

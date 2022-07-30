@@ -20,7 +20,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import wtf.gofancy.mc.repurposedlivings.container.AllayMapContainer;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
-import wtf.gofancy.mc.repurposedlivings.item.AllayMapDraftItem;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.item.EchoMindControlDevice;
 import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
@@ -47,11 +46,10 @@ public final class ModSetup {
     private static final Item.Properties ITEM_PROPERTIES = new Item.Properties().tab(REPURPOSED_LIVINGS_TAB);
     
     public static final RegistryObject<Item> ALLAY_MAP = ITEMS.register("allay_map", AllayMapItem::new);
-    public static final RegistryObject<Item> ALLAY_MAP_DRAFT = ITEMS.register("allay_map_draft", AllayMapDraftItem::new);
     public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDevice(ITEM_PROPERTIES));
     public static final RegistryObject<Item> ECHO_MIND_CONTROL_DEVICE = ITEMS.register("echo_mind_control_device", () -> new EchoMindControlDevice(ITEM_PROPERTIES));
     public static final RegistryObject<Item> ECHO_PEARL = ITEMS.register("echo_pearl", () -> new Item(ITEM_PROPERTIES));
-    
+
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
     
