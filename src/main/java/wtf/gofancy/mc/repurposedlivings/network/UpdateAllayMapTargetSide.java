@@ -45,7 +45,7 @@ public record UpdateAllayMapTargetSide(InteractionHand hand, Target target, Dire
                         .get(stack)
                         .orElseThrow();
 
-                final var currentTarget = this.target.getter.apply(data);
+                final var currentTarget = this.target.getter.apply(data).orElseThrow();
                 final var newTarget = new ItemTarget(currentTarget.pos(), this.side);
 
                 this.target.setter.accept(data, newTarget);
@@ -58,10 +58,10 @@ public record UpdateAllayMapTargetSide(InteractionHand hand, Target target, Dire
         SOURCE(AllayMapData::getSource, AllayMapData::setSource),
         DESTINATION(AllayMapData::getDestination, AllayMapData::setDestination);
 
-        public final Function<AllayMapData, ItemTarget> getter;
+        public final Function<AllayMapData, Optional<ItemTarget>> getter;
         public final BiConsumer<AllayMapData, ItemTarget> setter;
 
-        Target(Function<AllayMapData, ItemTarget> getter, BiConsumer<AllayMapData, ItemTarget> setter) {
+        Target(Function<AllayMapData, Optional<ItemTarget>> getter, BiConsumer<AllayMapData, ItemTarget> setter) {
             this.getter = getter;
             this.setter = setter;
         }

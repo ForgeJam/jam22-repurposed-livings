@@ -13,9 +13,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataStorageProvider;
+import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataSyncFlagProvider;
 import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
@@ -30,6 +32,33 @@ public class EventHandler {
                 new ResourceLocation(RepurposedLivings.MODID, "allay_map_data"),
                 new AllayMapDataStorageProvider()
         );
+    }
+
+    @SubscribeEvent
+    public void onAttachPlayerCapabilities(final AttachCapabilitiesEvent<Entity> event) {
+        if (!(event.getObject() instanceof Player)) return;
+
+        event.addCapability(
+                new ResourceLocation(RepurposedLivings.MODID, "allay_map_data_sync_flag"),
+                new AllayMapDataSyncFlagProvider()
+        );
+    }
+
+    @SubscribeEvent
+    public void onPlayerClone(PlayerEvent.Clone event) {
+        if (!event.isWasDeath()) return;
+
+        final var oldPlayer = event.getOriginal();
+        final var newPlayer = event.getEntity();
+
+        oldPlayer.reviveCaps();
+
+        final var oldCap = oldPlayer.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow();
+        final var newCap = newPlayer.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow();
+
+        newCap.deserializeNBT(oldCap.serializeNBT());
+
+        oldPlayer.invalidateCaps();
     }
 
     @SubscribeEvent

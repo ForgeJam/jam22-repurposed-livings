@@ -6,7 +6,10 @@ import wtf.gofancy.mc.repurposedlivings.item.AllayMapData;
 
 public class ClientMessageHandler {
 
-    public static void handleAllayMapDataUpdate(final int mapId, final AllayMapData data) {
-        Minecraft.getInstance().level.getCapability(Capabilities.ALLAY_MAP_DATA).resolve().orElseThrow().set(mapId, data);
+    public static void handleAllayMapDataUpdate(final AllayMapData data) {
+        Minecraft.getInstance().level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                .resolve()
+                .orElseThrow()
+                .set(data.getMapId(), data);
     }
 }

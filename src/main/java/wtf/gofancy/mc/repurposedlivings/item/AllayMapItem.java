@@ -45,7 +45,7 @@ public class AllayMapItem extends MapItem {
 
         level.setMapData(MapItem.makeKey(mapId), mapData);
 
-        level.getCapability(Capabilities.ALLAY_MAP_DATA).resolve().orElseThrow().set(mapId, new AllayMapData());
+        level.getCapability(Capabilities.ALLAY_MAP_DATA).resolve().orElseThrow().set(mapId, new AllayMapData(mapId));
 
         final ItemStack stack = new ItemStack(ModSetup.ALLAY_MAP.get());
         stack.getOrCreateTag().putInt("map", mapId);
@@ -141,14 +141,18 @@ public class AllayMapItem extends MapItem {
                     .get(stack)
                     .orElseThrow();
 
-            if (data.hasChanged()) {
-                data.applyToMap(MapItem.getSavedData(stack, level));
-                // TODO: the change only gets propagated to the first player who sees it, no problem in singleplayer but broken in multiplayer
+            data.tick(level);
+
+            final var syncFlag = player.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG)
+                    .resolve()
+                    .orElseThrow();
+
+            if (syncFlag.needsSync(data.getMapId())) {
                 Network.INSTANCE.send(
                         PacketDistributor.PLAYER.with(() -> player),
-                        new AllayMapDataUpdateMessage(MapItem.getMapId(stack), data)
+                        new AllayMapDataUpdateMessage(data)
                 );
-                data.setChanged(false);
+                syncFlag.setSynced(data.getMapId());
             }
         }
 

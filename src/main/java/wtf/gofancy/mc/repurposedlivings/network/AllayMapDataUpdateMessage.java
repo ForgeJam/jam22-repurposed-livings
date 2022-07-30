@@ -10,28 +10,25 @@ import wtf.gofancy.mc.repurposedlivings.item.AllayMapData;
 
 import java.util.function.Supplier;
 
-public record AllayMapDataUpdateMessage(int mapId, AllayMapData data) {
+public record AllayMapDataUpdateMessage(AllayMapData data) {
 
     public void encode(final FriendlyByteBuf buf) {
         final var nbt = new CompoundTag();
         nbt.put("data", AllayMapData.CODEC.encodeStart(NbtOps.INSTANCE, data).getOrThrow(false, str -> {}));
-
-        buf.writeInt(mapId);
         buf.writeNbt(nbt);
     }
 
     public static AllayMapDataUpdateMessage decode(final FriendlyByteBuf buf) {
-        final int mapId = buf.readInt();
         final var nbt = buf.readNbt().get("data");
         final var data = AllayMapData.CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, str -> {});
-        return new AllayMapDataUpdateMessage(mapId, data);
+        return new AllayMapDataUpdateMessage(data);
     }
 
     public void processClientbound(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(
                     Dist.CLIENT,
-                    () -> () -> ClientMessageHandler.handleAllayMapDataUpdate(this.mapId, this.data)
+                    () -> () -> ClientMessageHandler.handleAllayMapDataUpdate(this.data)
             );
         });
         ctx.get().setPacketHandled(true);

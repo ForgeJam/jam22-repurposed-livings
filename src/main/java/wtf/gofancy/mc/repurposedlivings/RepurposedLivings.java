@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataCapability;
+import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataSyncFlagCapability;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.network.Network;
 
@@ -34,5 +35,6 @@ public class RepurposedLivings {
 
     public void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.register(AllayMapDataCapability.class);
+        event.register(AllayMapDataSyncFlagCapability.class);
     }
 }
