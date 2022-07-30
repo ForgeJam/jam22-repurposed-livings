@@ -2,7 +2,6 @@ package wtf.gofancy.mc.repurposedlivings.capabilities;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.capabilities.Capability;
@@ -22,31 +21,36 @@ public class AllayMapDataSyncFlagProvider implements ICapabilityProvider, INBTSe
 
         public static final Codec<Set<Integer>> CODEC = Codec.list(Codec.INT).xmap(HashSet::new, ArrayList::new);
 
-        private Set<Integer> syncs = new HashSet<>();
+        private Set<Integer> synced = new HashSet<>();
 
         @Override
-        public boolean needsSync(int mapId) {
-            return this.syncs.contains(mapId);
-        }
-
-        @Override
-        public void setNeedsSync(int mapId) {
-            this.syncs.add(mapId);
+        public boolean requiresSync(int mapId) {
+            return !this.synced.contains(mapId);
         }
 
         @Override
         public void setSynced(int mapId) {
-            this.syncs.remove(mapId);
+            this.synced.add(mapId);
+        }
+
+        @Override
+        public void invalidate(int mapId) {
+            this.synced.remove(mapId);
+        }
+
+        @Override
+        public void invalidateAll() {
+            this.synced.clear();
         }
 
         @Override
         public Tag serializeNBT() {
-            return CODEC.encodeStart(NbtOps.INSTANCE, this.syncs).getOrThrow(false, str -> {});
+            return CODEC.encodeStart(NbtOps.INSTANCE, this.synced).getOrThrow(false, str -> {});
         }
 
         @Override
         public void deserializeNBT(Tag nbt) {
-            this.syncs = CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, str -> {});
+            this.synced = CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, str -> {});
         }
     }
 

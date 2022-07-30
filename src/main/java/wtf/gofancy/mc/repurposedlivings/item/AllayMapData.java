@@ -6,8 +6,6 @@ import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraftforge.common.util.LazyOptional;
-import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataSyncFlagCapability;
 import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
@@ -96,7 +94,7 @@ public class AllayMapData {
         level.players()
                 .stream()
                 .map(player -> player.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow())
-                .forEach(syncFlag -> syncFlag.setNeedsSync(this.mapId));
+                .forEach(syncFlag -> syncFlag.invalidate(this.mapId));
 
         this.dirty = false;
     }

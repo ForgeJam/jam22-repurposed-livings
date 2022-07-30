@@ -5,7 +5,9 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 public interface AllayMapDataSyncFlagCapability extends INBTSerializable<Tag> {
 
-    boolean needsSync(int mapId);
-    void setNeedsSync(int mapId);
+    boolean requiresSync(int mapId);
     void setSynced(int mapId);
+
+    void invalidate(int mapId);
+    void invalidateAll();
 }

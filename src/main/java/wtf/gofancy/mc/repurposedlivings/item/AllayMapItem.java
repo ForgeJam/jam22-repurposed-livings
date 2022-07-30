@@ -147,7 +147,7 @@ public class AllayMapItem extends MapItem {
                     .resolve()
                     .orElseThrow();
 
-            if (syncFlag.needsSync(data.getMapId())) {
+            if (syncFlag.requiresSync(data.getMapId())) {
                 Network.INSTANCE.send(
                         PacketDistributor.PLAYER.with(() -> player),
                         new AllayMapDataUpdateMessage(data)

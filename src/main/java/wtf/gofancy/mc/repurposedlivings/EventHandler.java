@@ -4,6 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -36,7 +38,7 @@ public class EventHandler {
 
     @SubscribeEvent
     public void onAttachPlayerCapabilities(final AttachCapabilitiesEvent<Entity> event) {
-        if (!(event.getObject() instanceof Player)) return;
+        if (!(event.getObject() instanceof ServerPlayer)) return;
 
         event.addCapability(
                 new ResourceLocation(RepurposedLivings.MODID, "allay_map_data_sync_flag"),
@@ -59,6 +61,13 @@ public class EventHandler {
         newCap.deserializeNBT(oldCap.serializeNBT());
 
         oldPlayer.invalidateCaps();
+    }
+
+    @SubscribeEvent
+    public void onPlayerJoinLevel(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            player.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow().invalidateAll();
+        }
     }
 
     @SubscribeEvent
