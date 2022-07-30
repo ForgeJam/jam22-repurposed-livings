@@ -28,6 +28,13 @@ public final class Network {
             UpdateAllayMapTarget::processServerPacket,
             Optional.of(NetworkDirection.PLAY_TO_SERVER)
         );
+        INSTANCE.registerMessage(id++,
+            SetItemInHandPacket.class,
+            SetItemInHandPacket::encode,
+            SetItemInHandPacket::decode,
+            SetItemInHandPacket::processClientPacket,
+            Optional.of(NetworkDirection.PLAY_TO_CLIENT)
+        );
     }
 
     private Network() {}
