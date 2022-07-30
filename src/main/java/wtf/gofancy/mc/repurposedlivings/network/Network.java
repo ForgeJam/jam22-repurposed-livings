@@ -22,14 +22,6 @@ public final class Network {
         int id = 0;
 
         INSTANCE.registerMessage(id++,
-            UpdateAllayMapTargetSide.class,
-            UpdateAllayMapTargetSide::encode,
-            UpdateAllayMapTargetSide::decode,
-            UpdateAllayMapTargetSide::processServerPacket,
-            Optional.of(NetworkDirection.PLAY_TO_SERVER)
-        );
-
-        INSTANCE.registerMessage(id++,
                 AllayMapDataUpdateMessage.class,
                 AllayMapDataUpdateMessage::encode,
                 AllayMapDataUpdateMessage::decode,

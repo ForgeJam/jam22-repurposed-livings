@@ -5,14 +5,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.TooltipFlag;
@@ -23,7 +18,6 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
-import wtf.gofancy.mc.repurposedlivings.container.AllayMapContainer;
 import wtf.gofancy.mc.repurposedlivings.network.AllayMapDataUpdateMessage;
 import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
@@ -51,15 +45,6 @@ public class AllayMapItem extends MapItem {
         stack.getOrCreateTag().putInt("map", mapId);
 
         return stack;
-    }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        // TODO: currently broken (ensureTargetsLoaded needs change + it tries to open everytime you want to click a container even if it is unfinished)
-//        if (player instanceof ServerPlayer serverPlayer && ensureTargetsLoaded(level, player, player.getItemInHand(usedHand))) {
-//            NetworkHooks.openScreen(serverPlayer, new AllayMapMenuProvider(usedHand), buf -> buf.writeEnum(usedHand));
-//        }
-        return super.use(level, player, usedHand);
     }
 
     @Override
@@ -170,18 +155,4 @@ public class AllayMapItem extends MapItem {
         // of course, if the player holds multiple maps this results in many update packets
         // TODO: check what vanilla maps do against the above statement (probably nothing)
     }
-
-    private record AllayMapMenuProvider(InteractionHand hand) implements MenuProvider {
-
-        @Override
-            public Component getDisplayName() {
-                return ModSetup.ALLAY_MAP.get().getDescription();
-            }
-    
-            @Nullable
-            @Override
-            public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-                return new AllayMapContainer(containerId, this.hand, player);
-            }
-        }
 }
