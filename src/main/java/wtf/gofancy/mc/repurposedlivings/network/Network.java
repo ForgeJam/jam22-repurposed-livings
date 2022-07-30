@@ -1,6 +1,5 @@
 package wtf.gofancy.mc.repurposedlivings.network;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -22,11 +21,18 @@ public final class Network {
         int id = 0;
 
         INSTANCE.registerMessage(id++,
-                AllayMapDataUpdateMessage.class,
-                AllayMapDataUpdateMessage::encode,
-                AllayMapDataUpdateMessage::decode,
-                AllayMapDataUpdateMessage::processClientbound,
-                Optional.of(NetworkDirection.PLAY_TO_CLIENT)
+            UpdateAllayMapDataPacket.class,
+            UpdateAllayMapDataPacket::encode,
+            UpdateAllayMapDataPacket::decode,
+            UpdateAllayMapDataPacket::processClientPacket,
+            Optional.of(NetworkDirection.PLAY_TO_CLIENT)
+        );
+        INSTANCE.registerMessage(id++,
+            SetItemInHandPacket.class,
+            SetItemInHandPacket::encode,
+            SetItemInHandPacket::decode,
+            SetItemInHandPacket::processClientPacket,
+            Optional.of(NetworkDirection.PLAY_TO_CLIENT)
         );
     }
 

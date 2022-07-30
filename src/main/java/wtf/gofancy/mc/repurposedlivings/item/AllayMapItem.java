@@ -7,7 +7,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.TooltipFlag;
@@ -18,7 +17,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
-import wtf.gofancy.mc.repurposedlivings.network.AllayMapDataUpdateMessage;
+import wtf.gofancy.mc.repurposedlivings.network.UpdateAllayMapDataPacket;
 import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
@@ -26,12 +25,27 @@ import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.List;
 
+/**
+ * Contains information about the item source and delivery targets.
+ * Can be given to Hijacked Allays.
+ */
 public class AllayMapItem extends MapItem {
 
     public AllayMapItem() {
         super(new Properties().stacksTo(1));
     }
 
+    /**
+     * Creates a new Allay map by creating and storing its associated {@link MapItemSavedData} and {@link AllayMapData}.
+     *
+     * The map is created without any target points, you need to add them manually afterwards via the level capability
+     * {@link wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataCapability AllayMapDataCapability}.
+     *
+     * @param level the level in which this map is created
+     * @param playerX the X position of the inventory this map will be placed in, used to calculate the map bounds
+     * @param playerZ the Z position of the inventory this map will be placed in, used to calculate the map bounds
+     * @return a new Allay map which is linked to its new map data
+     */
     public static ItemStack create(Level level, int playerX, int playerZ) {
         final int mapId = level.getFreeMapId();
 
@@ -139,24 +153,12 @@ public class AllayMapItem extends MapItem {
             if (syncFlag.requiresSync(data.getMapId())) {
                 Network.INSTANCE.send(
                         PacketDistributor.PLAYER.with(() -> player),
-                        new AllayMapDataUpdateMessage(data)
+                        new UpdateAllayMapDataPacket(data)
                 );
                 syncFlag.setSynced(data.getMapId());
             }
         }
 
         super.inventoryTick(stack, level, entity, itemSlot, isSelected);
-    }
-
-    @Nullable
-    @Override
-    public Packet<?> getUpdatePacket(ItemStack stack, Level level, Player player) {
-        return super.getUpdatePacket(stack, level, player);
-        // TODO: sync capability to client in here -> doing it now in inventoryTick
-        // we do not want a global sync mechanism as this would update all clients in the dimension if one map changes
-        // by syncing via this update packet we ensure to only send the data to that one client
-        // we also do not need to sync the complete capability but rather only that one entry for this specific map the player is holding
-        // of course, if the player holds multiple maps this results in many update packets
-        // TODO: check what vanilla maps do against the above statement (probably nothing)
     }
 }

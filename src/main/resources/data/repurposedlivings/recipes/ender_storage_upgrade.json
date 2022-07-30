@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "OOO",
+        "ECE",
+        "OOO"
+    ],
+    "key": {
+        "O": {
+            "item": "minecraft:obsidian"
+        },
+        "E": {
+            "item": "minecraft:ender_pearl"
+        },
+        "C": {
+            "tag": "forge:chests/wooden"
+        }
+    },
+    "result": {
+        "item": "repurposedlivings:ender_storage_upgrade",
+        "count": 1
+    }
+}

@@ -3,8 +3,8 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -102,15 +102,19 @@ public class EventHandler {
         }
     }
 
+    /**
+     * Lets us respond to entity interactions before {@link Entity#interact(Player, InteractionHand)} runs.
+     */
     @SubscribeEvent
     public void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         ItemStack stack = event.getItemStack();
         Entity target = event.getTarget();
         Item item = stack.getItem();
-        
+
         if (item instanceof MindControlDevice controller && target instanceof LivingEntity livingEntity) {
-            if (controller.interactLivingEntityFirst(livingEntity, stack)) {
-                event.setCancellationResult(InteractionResult.SUCCESS);
+            InteractionResult result = controller.interactLivingEntityFirst(livingEntity, stack);
+            if (result != InteractionResult.PASS) {
+                event.setCancellationResult(result);
                 event.setCanceled(true);
             }
         }

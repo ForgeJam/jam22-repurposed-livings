@@ -2,13 +2,11 @@ package wtf.gofancy.mc.repurposedlivings;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +17,7 @@ import net.minecraftforge.registries.RegistryObject;
 import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.item.EchoMindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.item.EnderStorageUpgradeItem;
 import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
 import wtf.gofancy.mc.repurposedlivings.util.ItemStackListEntityDataSerializer;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
@@ -39,13 +38,12 @@ public final class ModSetup {
             return new ItemStack(ALLAY_MAP.get());
         }
     };
-    private static final Item.Properties ITEM_PROPERTIES = new Item.Properties().tab(REPURPOSED_LIVINGS_TAB);
 
     public static final RegistryObject<Item> ALLAY_MAP = ITEMS.register("allay_map", AllayMapItem::new);
-    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDevice(ITEM_PROPERTIES));
-    public static final RegistryObject<Item> ECHO_MIND_CONTROL_DEVICE = ITEMS.register("echo_mind_control_device", () -> new EchoMindControlDevice(ITEM_PROPERTIES));
-    public static final RegistryObject<Item> ECHO_PEARL = ITEMS.register("echo_pearl", () -> new Item(ITEM_PROPERTIES));
-
+    public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDevice(itemProperties()));
+    public static final RegistryObject<Item> ECHO_MIND_CONTROL_DEVICE = ITEMS.register("echo_mind_control_device", () -> new EchoMindControlDevice(itemProperties()));
+    public static final RegistryObject<Item> ENDER_STORAGE_UPGRADE = ITEMS.register("ender_storage_upgrade", () -> new EnderStorageUpgradeItem(itemProperties()));
+    
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
 
@@ -68,6 +66,10 @@ public final class ModSetup {
         ENTITY_TYPES.register(bus);
         SOUNDS.register(bus);
         ENTITY_DATA_SERIALIZERS.register(bus);
+    }
+
+    private static Item.Properties itemProperties() {
+        return new Item.Properties().tab(REPURPOSED_LIVINGS_TAB);
     }
 
     private ModSetup() {}
