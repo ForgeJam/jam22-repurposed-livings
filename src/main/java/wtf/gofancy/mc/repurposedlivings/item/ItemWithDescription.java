@@ -7,14 +7,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.List;
 
-public class EnderStorageUpgradeItem extends Item {
+public class ItemWithDescription extends Item {
     
-    public EnderStorageUpgradeItem(Properties properties) {
+    public ItemWithDescription(Properties properties) {
         super(properties);
     }
 

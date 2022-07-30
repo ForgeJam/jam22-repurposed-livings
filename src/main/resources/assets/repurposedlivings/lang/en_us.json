@@ -10,6 +10,7 @@
     "item.repurposedlivings.mind_control_device": "Mind Control Device",
     "item.repurposedlivings.echo_mind_control_device": "Echo Mind Control Device",
     "item.repurposedlivings.ender_storage_upgrade": "Ender Storage Upgrade",
+    "item.repurposedlivings.ender_speed_upgrade": "Ender Speed Upgrade",
 
     "item.repurposedlivings.allay_map.tooltip.complete": "Use this map to guide Allays under your control!",
     "item.repurposedlivings.allay_map.tooltip.incomplete": "Shift-Click other targets to complete this map!",
@@ -25,6 +26,8 @@
     "item.repurposedlivings.allay_map.tooltip.direction.east": "East",
 
     "item.repurposedlivings.ender_storage_upgrade.tooltip.description": "Adds 3 extra slots to the Allay's inventory",
+
+    "item.repurposedlivings.ender_speed_upgrade.tooltip.description": "Increases the Allay's speed",
 
     "message.repurposedlivings.allay_map_transformed": "Shift-Click another target to complete this map",
     "message.repurposedlivings.allay_map_incomplete": "Map not yet completed",

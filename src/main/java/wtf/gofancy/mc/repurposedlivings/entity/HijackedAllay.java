@@ -25,6 +25,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -42,16 +43,23 @@ import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class HijackedAllay extends Allay {
-    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY);
-    protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
+    private static final ImmutableList<? extends SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY);
+    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
         MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
         MemoryModuleType.IS_PANICKING, MemoryModuleType.HURT_BY, MemoryModuleType.LIKED_PLAYER,
         MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, ModSetup.ALLAY_SOURCE_TARET.get(), ModSetup.ALLAY_DELIVERY_TARET.get()
     );
-    protected static final EntityDataAccessor<NonNullList<ItemStack>> EQUIPMENT_SLOTS = SynchedEntityData.defineId(HijackedAllay.class, ModSetup.ITEM_STACK_LIST_SERIALIZER.get());
+    private static final EntityDataAccessor<NonNullList<ItemStack>> EQUIPMENT_SLOTS = SynchedEntityData.defineId(HijackedAllay.class, ModSetup.ITEM_STACK_LIST_SERIALIZER.get());
+    private static final float BASE_SPEED = 1.75F;
+    private static final float ACCELERATED_SPEED = BASE_SPEED + 0.5F;
+    private static final Map<Item, AllayEquipment> UPGRADES = Map.of(
+        ModSetup.ENDER_STORAGE_UPGRADE.get(), AllayEquipment.STORAGE,
+        ModSetup.ENDER_SPEED_UPGRADE.get(), AllayEquipment.SPEED
+    );
 
     /**
      * Extra inventory space, enabled by applying the {@link ModSetup#ENDER_STORAGE_UPGRADE Storage Upgrade}
@@ -180,9 +188,10 @@ public class HijackedAllay extends Allay {
             player.setItemInHand(InteractionHand.MAIN_HAND, map);
             return InteractionResult.SUCCESS;
         }
-        // Apply the Storage Upgrade to the Allay
-        else if (stack.getItem() == ModSetup.ENDER_STORAGE_UPGRADE.get() && getItemInSlot(AllayEquipment.STORAGE).isEmpty()) {
-            setEquipmentSlot(AllayEquipment.STORAGE, stack);
+        // Apply the upgrades to the Allay
+        AllayEquipment upgradeSlot = UPGRADES.get(stack.getItem());
+        if (upgradeSlot != null) {
+            setEquipmentSlot(upgradeSlot, stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             return InteractionResult.SUCCESS;
         }
@@ -259,6 +268,10 @@ public class HijackedAllay extends Allay {
             this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
         }
     }
+    
+    public float getTransportSpeedMultiplier() {
+        return hasSpeedUpgrade() ? ACCELERATED_SPEED : BASE_SPEED;
+    }
 
     /**
      * Find an IItemHandler at a target position with a range limit.
@@ -281,6 +294,10 @@ public class HijackedAllay extends Allay {
 
     private boolean hasStorageUpgrade() {
         return !getItemInSlot(AllayEquipment.STORAGE).isEmpty();
+    }
+    
+    private boolean hasSpeedUpgrade() {
+        return !getItemInSlot(AllayEquipment.SPEED).isEmpty();
     }
 
     /**
