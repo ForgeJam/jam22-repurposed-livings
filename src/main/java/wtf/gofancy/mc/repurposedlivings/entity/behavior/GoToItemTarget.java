@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -21,10 +22,10 @@ import java.util.function.Predicate;
  */
 public class GoToItemTarget<E extends Mob> extends Behavior<E> {
    private final MemoryModuleType<ItemTarget> itemTargetMemory;
-   private final float speedModifier;
+   private final Function<E, Float> speedModifier;
    private final Predicate<E> condition;
 
-   public GoToItemTarget(MemoryModuleType<ItemTarget> itemTargetMemory, float speedModifier, Predicate<E> condition) {
+   public GoToItemTarget(MemoryModuleType<ItemTarget> itemTargetMemory, Function<E, Float> speedModifier, Predicate<E> condition) {
       super(ImmutableMap.of(itemTargetMemory, MemoryStatus.VALUE_PRESENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.IS_PANICKING, MemoryStatus.VALUE_ABSENT));
       this.itemTargetMemory = itemTargetMemory;
       this.speedModifier = speedModifier;
@@ -37,13 +38,14 @@ public class GoToItemTarget<E extends Mob> extends Behavior<E> {
    }
 
    @Override
-   protected void start(ServerLevel level, Mob mob, long gameTime) {
+   protected void start(ServerLevel level, E mob, long gameTime) {
       Brain<?> brain = mob.getBrain();
       ItemTarget itemTarget = brain.getMemory(this.itemTargetMemory).orElseThrow(); 
       BlockPos lookPos = itemTarget.pos();
       BlockPos walkPos = itemTarget.getRelativePos();
       PositionTracker lookTarget = new BlockPosTracker(lookPos);
-      WalkTarget walkTarget = new WalkTarget(new BlockPosTracker(walkPos), this.speedModifier, 0);
+      float speedModifier = this.speedModifier.apply(mob);
+      WalkTarget walkTarget = new WalkTarget(new BlockPosTracker(walkPos), speedModifier, 0);
       
       brain.setMemory(MemoryModuleType.LOOK_TARGET, lookTarget);
       brain.setMemory(MemoryModuleType.WALK_TARGET, walkTarget);

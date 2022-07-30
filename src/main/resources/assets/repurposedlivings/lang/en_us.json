@@ -18,6 +18,8 @@
     "item.repurposedlivings.echo_mind_control_device": "Echo Mind Control Device",
     "item.repurposedlivings.ender_storage_upgrade": "Ender Storage Upgrade",
     "item.repurposedlivings.ender_storage_upgrade.description": "Adds 3 extra slots to the Allay's inventory",
+    "item.repurposedlivings.ender_speed_upgrade": "Ender Speed Upgrade",
+    "item.repurposedlivings.ender_speed_upgrade.description": "Increases the Allay's speed",
     "repurposedlivings.target.from": "From: ",
     "repurposedlivings.target.to": "To: ",
     

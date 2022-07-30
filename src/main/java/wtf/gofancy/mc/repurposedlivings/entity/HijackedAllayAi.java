@@ -52,8 +52,8 @@ public class HijackedAllayAi extends AllayAi {
         brain.addActivityWithConditions(
             ModSetup.ALLAY_TRANSFER_ITEMS.get(),
             ImmutableList.of(
-                Pair.of(0, new GoToItemTarget<>(ModSetup.ALLAY_SOURCE_TARET.get(), 1.75F, e -> e.getItemInHand(InteractionHand.MAIN_HAND).isEmpty())),
-                Pair.of(1, new GoToItemTarget<>(ModSetup.ALLAY_DELIVERY_TARET.get(), 1.75F, Allay::hasItemInHand))
+                Pair.of(0, new GoToItemTarget<>(ModSetup.ALLAY_SOURCE_TARET.get(), HijackedAllay::getTransportSpeedMultiplier, e -> e.getItemInHand(InteractionHand.MAIN_HAND).isEmpty())),
+                Pair.of(1, new GoToItemTarget<>(ModSetup.ALLAY_DELIVERY_TARET.get(), HijackedAllay::getTransportSpeedMultiplier, Allay::hasItemInHand))
             ),
             ImmutableSet.of(
                 Pair.of(ModSetup.ALLAY_SOURCE_TARET.get(), MemoryStatus.VALUE_PRESENT),

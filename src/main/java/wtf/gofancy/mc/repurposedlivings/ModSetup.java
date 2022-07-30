@@ -46,7 +46,8 @@ public final class ModSetup {
     public static final RegistryObject<Item> ALLAY_MAP_DRAFT = ITEMS.register("allay_map_draft", AllayMapDraftItem::new);
     public static final RegistryObject<Item> MIND_CONTROL_DEVICE = ITEMS.register("mind_control_device", () -> new MindControlDevice(itemProperties()));
     public static final RegistryObject<Item> ECHO_MIND_CONTROL_DEVICE = ITEMS.register("echo_mind_control_device", () -> new EchoMindControlDevice(itemProperties()));
-    public static final RegistryObject<Item> ENDER_STORAGE_UPGRADE = ITEMS.register("ender_storage_upgrade", () -> new EnderStorageUpgradeItem(itemProperties()));
+    public static final RegistryObject<Item> ENDER_STORAGE_UPGRADE = ITEMS.register("ender_storage_upgrade", () -> new ItemWithDescription(itemProperties()));
+    public static final RegistryObject<Item> ENDER_SPEED_UPGRADE = ITEMS.register("ender_speed_upgrade", () -> new ItemWithDescription(itemProperties()));
     
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_SOURCE_TARET = MEMORY_MODULE_TYPES.register("allay_source_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
     public static final RegistryObject<MemoryModuleType<ItemTarget>> ALLAY_DELIVERY_TARET = MEMORY_MODULE_TYPES.register("allay_delivery_target", () -> new MemoryModuleType<>(Optional.of(ItemTarget.CODEC)));
