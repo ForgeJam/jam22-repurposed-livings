@@ -66,7 +66,7 @@ public class AllayMapData {
     public void applyToMap(final MapItemSavedData map) {
         if (this.source != null) {
             map.addDecoration(
-                    MapDecoration.Type.TARGET_X,
+                    MapDecoration.Type.TARGET_POINT,
                     null,
                     "source",
                     source.pos().getX(),
@@ -79,11 +79,11 @@ public class AllayMapData {
             map.addDecoration(
                     MapDecoration.Type.TARGET_X,
                     null,
-                    "source",
+                    "destination",
                     destination.pos().getX(),
                     destination.pos().getZ(),
                     0.0,
-                    ModUtil.getMapTranslation("source")
+                    ModUtil.getMapTranslation("destination")
             );
         }
     }
