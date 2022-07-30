@@ -63,6 +63,10 @@ public class AllayMapData {
         this.dirty = true;
     }
 
+    public boolean isComplete() {
+        return this.source != null && this.destination != null;
+    }
+
     public void tick(final Level level) {
         if (!this.dirty) return;
 
