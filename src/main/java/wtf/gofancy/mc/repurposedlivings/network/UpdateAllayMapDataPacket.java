@@ -13,15 +13,11 @@ import java.util.function.Supplier;
 public record UpdateAllayMapDataPacket(AllayMapData data) {
 
     public void encode(final FriendlyByteBuf buf) {
-        final var nbt = new CompoundTag();
-        nbt.put("data", AllayMapData.CODEC.encodeStart(NbtOps.INSTANCE, data).getOrThrow(false, str -> {}));
-        buf.writeNbt(nbt);
+        buf.writeWithCodec(AllayMapData.CODEC, this.data);
     }
 
     public static UpdateAllayMapDataPacket decode(final FriendlyByteBuf buf) {
-        final var nbt = buf.readNbt().get("data");
-        final var data = AllayMapData.CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, str -> {});
-        return new UpdateAllayMapDataPacket(data);
+        return new UpdateAllayMapDataPacket(buf.readWithCodec(AllayMapData.CODEC));
     }
 
     public void processClientPacket(Supplier<NetworkEvent.Context> ctx) {

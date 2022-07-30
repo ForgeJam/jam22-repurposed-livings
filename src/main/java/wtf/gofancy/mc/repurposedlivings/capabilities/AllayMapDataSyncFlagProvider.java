@@ -59,10 +59,7 @@ public class AllayMapDataSyncFlagProvider implements ICapabilityProvider, INBTSe
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == Capabilities.ALLAY_MAP_DATA_SYNC_FLAG) {
-            return this.optional.cast();
-        }
-        return LazyOptional.empty();
+        return Capabilities.ALLAY_MAP_DATA_SYNC_FLAG.orEmpty(cap, this.optional);
     }
 
     @Override

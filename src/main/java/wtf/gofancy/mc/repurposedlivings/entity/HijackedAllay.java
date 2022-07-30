@@ -13,7 +13,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -40,7 +39,6 @@ import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.network.SetItemInHandPacket;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
-import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.Map;
@@ -153,27 +151,27 @@ public class HijackedAllay extends Allay {
             return InteractionResult.SUCCESS;
         // Give the Allay an Allay Map
         } else if (stack.is(ModSetup.ALLAY_MAP.get()) && map.isEmpty()) {
-            final var data = player.level.getCapability(Capabilities.ALLAY_MAP_DATA)
-                    .resolve()
-                    .orElseThrow()
-                    .get(stack)
+            return player.getCapability(Capabilities.ALLAY_MAP_DATA).resolve()
+                    .flatMap(data -> data.get(stack))
+                    .map(data -> {
+                        if (!data.isComplete()) {
+                            if (player instanceof ServerPlayer serverPlayer) {
+                                serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete")
+                                        .withStyle(ChatFormatting.RED), true);
+                            }
+                            return InteractionResult.CONSUME;
+                        }
+
+                        this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), data.getSource().orElseThrow());
+                        this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), data.getDestination().orElseThrow());
+
+                        this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
+
+                        setEquipmentSlot(AllayEquipment.MAP, stack);
+                        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                        return InteractionResult.SUCCESS;
+                    })
                     .orElseThrow();
-
-            if (!data.isComplete()) {
-                if (player instanceof ServerPlayer serverPlayer) {
-                    serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete").withStyle(ChatFormatting.RED), true);
-                }
-                return InteractionResult.CONSUME;
-            }
-
-            this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), data.getSource().orElseThrow());
-            this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), data.getDestination().orElseThrow());
-
-            this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
-
-            setEquipmentSlot(AllayEquipment.MAP, stack);
-            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            return InteractionResult.SUCCESS;
         }
         // Take an Allay Map from the Allay
         else if (stack.isEmpty() && !map.isEmpty()) {

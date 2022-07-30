@@ -16,10 +16,7 @@ public class AllayMapDataStorageProvider implements ICapabilityProvider, INBTSer
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-        if (cap == Capabilities.ALLAY_MAP_DATA) {
-            return this.optional.cast();
-        }
-        return LazyOptional.empty();
+        return Capabilities.ALLAY_MAP_DATA.orEmpty(cap, this.optional);
     }
 
     @Override

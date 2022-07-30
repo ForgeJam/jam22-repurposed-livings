@@ -93,7 +93,7 @@ public class EventHandler {
                         .setSource(new ItemTarget(pos, side));
 
                 player.setItemInHand(event.getHand(), draftStack);
-                player.displayClientMessage(TranslationUtils.message("allay_map_complete_draft")
+                player.displayClientMessage(TranslationUtils.message("allay_map_transformed")
                         .withStyle(ChatFormatting.AQUA), true);
 
                 event.setCancellationResult(InteractionResult.CONSUME);

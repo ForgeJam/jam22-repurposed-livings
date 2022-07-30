@@ -8,7 +8,6 @@ import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
-import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.Optional;
@@ -16,10 +15,18 @@ import java.util.Optional;
 public class AllayMapData {
 
     public static final Codec<AllayMapData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("mapId").forGetter(AllayMapData::getMapId),
-            ItemTarget.CODEC.optionalFieldOf("source").forGetter(AllayMapData::getSource),
-            ItemTarget.CODEC.optionalFieldOf("destination").forGetter(AllayMapData::getDestination)
-    ).apply(instance, AllayMapData::new));
+                    Codec.INT.fieldOf("mapId").forGetter(AllayMapData::getMapId),
+                    ItemTarget.CODEC.optionalFieldOf("source").forGetter(AllayMapData::getSource),
+                    ItemTarget.CODEC.optionalFieldOf("destination").forGetter(AllayMapData::getDestination)
+            )
+            .apply(
+                    instance,
+                    (mapId, source, destination) -> new AllayMapData(
+                            mapId,
+                            source.orElse(null),
+                            destination.orElse(null)
+                    )
+            ));
 
     public AllayMapData(final int mapId) {
         this.dirty = false;
@@ -28,11 +35,11 @@ public class AllayMapData {
         this.destination = null;
     }
 
-    private AllayMapData(int mapId, Optional<ItemTarget> source, Optional<ItemTarget> destination) {
+    private AllayMapData(int mapId, ItemTarget source, ItemTarget destination) {
         this.dirty = true;
         this.mapId = mapId;
-        this.source = source.orElse(null);
-        this.destination = destination.orElse(null);
+        this.source = source;
+        this.destination = destination;
     }
 
     private boolean dirty;
