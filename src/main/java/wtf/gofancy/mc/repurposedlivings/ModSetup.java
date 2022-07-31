@@ -10,6 +10,8 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -17,10 +19,12 @@ import net.minecraftforge.registries.RegistryObject;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.feature.mindcontrol.EchoMindControlDevice;
-import wtf.gofancy.mc.repurposedlivings.util.ItemWithDescription;
 import wtf.gofancy.mc.repurposedlivings.feature.mindcontrol.MindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.recipe.AllayMapCloneRecipe;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.recipe.AllayMapExtendingRecipe;
 import wtf.gofancy.mc.repurposedlivings.util.ItemStackListEntityDataSerializer;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
+import wtf.gofancy.mc.repurposedlivings.util.ItemWithDescription;
 
 import java.util.Optional;
 
@@ -31,6 +35,7 @@ public final class ModSetup {
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, RepurposedLivings.MODID);
     private static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, RepurposedLivings.MODID);
     private static final DeferredRegister<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS = DeferredRegister.create(ForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS, RepurposedLivings.MODID);
+    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, RepurposedLivings.MODID);
 
     public static final CreativeModeTab REPURPOSED_LIVINGS_TAB = new CreativeModeTab(RepurposedLivings.MODID) {
         @Override
@@ -60,6 +65,9 @@ public final class ModSetup {
 
     public static final RegistryObject<EntityDataSerializer<NonNullList<ItemStack>>> ITEM_STACK_LIST_SERIALIZER = ENTITY_DATA_SERIALIZERS.register("item_stack_list", ItemStackListEntityDataSerializer::new);
 
+    public static final RegistryObject<RecipeSerializer<AllayMapCloneRecipe>> ALLAY_MAP_CLONE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("allay_map_clone", () -> new SimpleRecipeSerializer<>(AllayMapCloneRecipe::new));
+    public static final RegistryObject<RecipeSerializer<AllayMapExtendingRecipe>> ALLAY_MAP_EXTENDING_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("allay_map_extending", () -> new SimpleRecipeSerializer<>(AllayMapExtendingRecipe::new));
+
     static void register(IEventBus bus) {
         ITEMS.register(bus);
         MEMORY_MODULE_TYPES.register(bus);
@@ -67,6 +75,7 @@ public final class ModSetup {
         ENTITY_TYPES.register(bus);
         SOUNDS.register(bus);
         ENTITY_DATA_SERIALIZERS.register(bus);
+        RECIPE_SERIALIZERS.register(bus);
     }
 
     private static Item.Properties itemProperties() {
