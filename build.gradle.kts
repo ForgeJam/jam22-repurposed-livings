@@ -64,17 +64,16 @@ minecraft {
 sourceSets.main.configure { resources.srcDir("src/generated/resources") }
 
 repositories {
-    // Put repositories for dependencies here
-    // ForgeGradle automatically adds the Forge maven and Maven Central for you
-
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
-    // flatDir {
-    //     dir 'libs'
-    // }
+    maven {
+        name = "Cursemaven"
+        url = uri("https://cursemaven.com")
+    }
 }
 
 dependencies {
     minecraft(group = "net.minecraftforge", name = "forge", version = "1.19.1-42.0.0")
+    
+    compileOnly(fg.deobf("curse.maven:the-one-probe-245211:3871444"))
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

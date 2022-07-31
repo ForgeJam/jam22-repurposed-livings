@@ -3,6 +3,7 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network.ContainerUpdatePacket;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network.SetItemInHandPacket;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.map.network.UpdateAllayMapDataPacket;
 
@@ -33,6 +34,13 @@ public final class Network {
             SetItemInHandPacket::encode,
             SetItemInHandPacket::decode,
             SetItemInHandPacket::processClientPacket,
+            Optional.of(NetworkDirection.PLAY_TO_CLIENT)
+        );
+        INSTANCE.registerMessage(id++,
+            ContainerUpdatePacket.class,
+            ContainerUpdatePacket::encode,
+            ContainerUpdatePacket::decode,
+            ContainerUpdatePacket::processClientPacket,
             Optional.of(NetworkDirection.PLAY_TO_CLIENT)
         );
     }

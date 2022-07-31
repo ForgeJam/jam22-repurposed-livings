@@ -6,17 +6,23 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
+import wtf.gofancy.mc.repurposedlivings.compat.ModProbeProvider;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataCapability;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataSyncFlagCapability;
-import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
 
 @Mod(RepurposedLivings.MODID)
 public class RepurposedLivings {
     public static final String MODID = "repurposedlivings";
     private static final Logger LOGGER = LogUtils.getLogger();
+    
+    private static final String THEONEPROBE_MODID = "theoneprobe";
 
     public static ResourceLocation rl(final String path) {
         return new ResourceLocation(MODID, path);
@@ -26,6 +32,7 @@ public class RepurposedLivings {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::onEntityAttributeCreation);
         bus.addListener(this::registerCapabilities);
+        bus.addListener(this::enqueIMC);
         ModSetup.register(bus);
         
         Network.registerPackets();
@@ -40,5 +47,11 @@ public class RepurposedLivings {
     public void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.register(AllayMapDataCapability.class);
         event.register(AllayMapDataSyncFlagCapability.class);
+    }
+    
+    public void enqueIMC(InterModEnqueueEvent event) {
+        if (ModList.get().isLoaded(THEONEPROBE_MODID)) {
+            InterModComms.sendTo(THEONEPROBE_MODID, "getTheOneProbe", ModProbeProvider::new);
+        }
     }
 }

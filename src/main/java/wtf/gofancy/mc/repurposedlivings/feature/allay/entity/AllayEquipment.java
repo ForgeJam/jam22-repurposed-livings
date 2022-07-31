@@ -10,9 +10,14 @@ public enum AllayEquipment {
     CONTROLLER,
     /**
      * Contains information about the item source and delivery targets.
-     * It can be given to the Allay and removed by players. 
      */
     MAP,
-    SPEED,
-    STORAGE
+    /**
+     * Adds 3 extra available slots to the Allay's inventory.
+     */
+    STORAGE,
+    /**
+     * Increases the Allay's speed multiplier
+     */
+    SPEED
 }

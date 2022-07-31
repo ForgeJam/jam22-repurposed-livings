@@ -26,7 +26,7 @@ public record SetItemInHandPacket(int entityId, ItemStack stack) {
         ctx.get().enqueueWork(() ->
                 DistExecutor.unsafeRunWhenOn(
                         Dist.CLIENT,
-                        () -> () -> ClientPacketHandler.handleSetItemInHandPacket(this)
+                        () -> () -> ClientPacketHandler.handleSetItemInHand(this)
                 ));
         ctx.get().setPacketHandled(true);
     }

@@ -9,11 +9,14 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -31,20 +34,26 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.PacketDistributor;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.Network;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network.ContainerUpdatePacket;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network.SetItemInHandPacket;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
+import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
-public class HijackedAllay extends Allay {
+public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
     private static final ImmutableList<? extends SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY);
     private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
         MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES,
@@ -66,6 +75,8 @@ public class HijackedAllay extends Allay {
 
     public HijackedAllay(EntityType<? extends HijackedAllay> type, Level level) {
         super(type, level);
+        
+        if (!this.level.isClientSide) this.extendedInventory.addListener(this::onExtendedInventoryChanged);
     }
     
     public ItemStack getItemInSlot(AllayEquipment slot) {
@@ -83,6 +94,33 @@ public class HijackedAllay extends Allay {
         if (!empty && !ItemStack.isSameIgnoreDurability(stack, result)) {
             playEquipSound(stack);
         }
+    }
+    
+    public SimpleContainer getExtendedInventory() {
+        return this.extendedInventory;
+    }
+    
+    public List<ItemStack> getExtendedInventoryContent() {
+        return IntStream.range(0, this.extendedInventory.getContainerSize())
+            .mapToObj(this.extendedInventory::getItem)
+            .toList();
+    }
+
+    @Override
+    public void writeSpawnData(FriendlyByteBuf buf) {
+        ContainerUpdatePacket packet = new ContainerUpdatePacket(0, getExtendedInventoryContent());
+        packet.encode(buf);
+    }
+
+    @Override
+    public void readSpawnData(FriendlyByteBuf buf) {
+        ContainerUpdatePacket packet = ContainerUpdatePacket.decode(buf);
+        ModUtil.updateContainerContent(this.extendedInventory, packet.stacks());
+    }
+
+    @Override
+    public Packet<?> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     @Override
@@ -238,11 +276,11 @@ public class HijackedAllay extends Allay {
             .flatMap(be -> be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).resolve());
     }
 
-    private boolean hasStorageUpgrade() {
+    public boolean hasStorageUpgrade() {
         return !getItemInSlot(AllayEquipment.STORAGE).isEmpty();
     }
     
-    private boolean hasSpeedUpgrade() {
+    public boolean hasSpeedUpgrade() {
         return !getItemInSlot(AllayEquipment.SPEED).isEmpty();
     }
 
@@ -277,7 +315,7 @@ public class HijackedAllay extends Allay {
         // If there's no remainder, set it to the next item from our inventory to be inserted next tick
         if (remainder.isEmpty() && hasStorageUpgrade()) {
             for (int i = 0; i < this.extendedInventory.getContainerSize(); i++) {
-                ItemStack next = this.extendedInventory.removeItemNoUpdate(i);
+                ItemStack next = this.extendedInventory.removeItem(i, Integer.MAX_VALUE);
                 if (!next.isEmpty()) {
                     remainder = next;
                     break;
@@ -373,5 +411,9 @@ public class HijackedAllay extends Allay {
     private void setItemInHandSynced(ItemStack stack) {
         setItemInHand(InteractionHand.MAIN_HAND, stack);
         Network.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new SetItemInHandPacket(getId(), stack));
+    }
+    
+    private void onExtendedInventoryChanged(Container container) {
+        Network.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ContainerUpdatePacket(getId(), getExtendedInventoryContent()));
     }
 }

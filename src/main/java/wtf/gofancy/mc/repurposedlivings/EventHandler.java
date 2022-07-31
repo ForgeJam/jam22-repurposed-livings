@@ -18,7 +18,9 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataCapability;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataStorageProvider;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataSyncFlagCapability;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataSyncFlagProvider;
 import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.feature.mindcontrol.MindControlDevice;
@@ -31,7 +33,7 @@ public class EventHandler {
     @SubscribeEvent
     public void onAttachCapabilities(final AttachCapabilitiesEvent<Level> event) {
         event.addCapability(
-                RepurposedLivings.rl("allay_map_data"),
+                AllayMapDataCapability.NAME,
                 new AllayMapDataStorageProvider()
         );
     }
@@ -41,7 +43,7 @@ public class EventHandler {
         if (!(event.getObject() instanceof ServerPlayer)) return;
 
         event.addCapability(
-                RepurposedLivings.rl("allay_map_data_sync_flag"),
+                AllayMapDataSyncFlagCapability.NAME,
                 new AllayMapDataSyncFlagProvider()
         );
     }
