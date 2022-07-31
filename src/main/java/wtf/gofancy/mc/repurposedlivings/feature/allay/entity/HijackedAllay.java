@@ -323,7 +323,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
             }
         }
         // Add the remainder to the Allay's hand
-        if (!ItemStack.matches(remainder, itemInHand)) setItemInHandSynced(remainder);
+        if (remainder != itemInHand) setItemInHandSynced(remainder);
     }
 
     /**
@@ -402,6 +402,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
 
         spawnAtLocation(getItemInHand(InteractionHand.MAIN_HAND));
         setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        this.extendedInventory.removeAllItems().forEach(this::spawnAtLocation);
 
         setEquipmentSlot(AllayEquipment.MAP, ItemStack.EMPTY);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
