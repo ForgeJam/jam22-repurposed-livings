@@ -9,31 +9,30 @@ import wtf.gofancy.mc.repurposedlivings.RepurposedLivings;
 
 public class TranslationUtils {
 
-    public static MutableComponent generic(String name, Object... args) {
+    public static MutableComponent generic(final String name, final Object... args) {
         return Component.translatable(String.join(".", RepurposedLivings.MODID, name), args);
     }
 
-    public static MutableComponent item(Item item, String name, Object... args) {
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+    public static MutableComponent item(final Item item, final String name, final Object... args) {
+        final ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
         return Component.translatable(String.join(".", "item", key.getNamespace(), key.getPath(), name), args);
     }
 
-    public static MutableComponent message(String name, Object... args) {
+    public static MutableComponent message(final String name, final Object... args) {
         return Component.translatable(String.join(".", "message", RepurposedLivings.MODID, name), args);
     }
 
-    public static MutableComponent tooltip(Item item, String name, Object... args) {
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+    public static MutableComponent tooltip(final Item item, final String name, final Object... args) {
+        final ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
         return Component.translatable(
             String.join(".", "item", key.getNamespace(), key.getPath(), "tooltip", name),
             args
         );
     }
 
-    public static MutableComponent get(String prefix, String name, Object... args) {
+    public static MutableComponent get(final String prefix, final String name, final Object... args) {
         return Component.translatable(String.join(".", prefix, RepurposedLivings.MODID, name), args);
     }
 
-    private TranslationUtils() {
-    }
+    private TranslationUtils() {}
 }

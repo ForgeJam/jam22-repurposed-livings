@@ -9,6 +9,7 @@ import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapData;
 
 import java.util.function.Supplier;
 
+@SuppressWarnings("deprecation")
 public record UpdateAllayMapDataPacket(AllayMapData data) {
 
     public void encode(final FriendlyByteBuf buf) {
@@ -19,12 +20,8 @@ public record UpdateAllayMapDataPacket(AllayMapData data) {
         return new UpdateAllayMapDataPacket(buf.readWithCodec(AllayMapData.CODEC));
     }
 
-    public void processClientPacket(Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() ->
-                DistExecutor.unsafeRunWhenOn(
-                        Dist.CLIENT,
-                        () -> () -> ClientPacketHandler.handleAllayMapDataUpdate(this.data)
-                ));
+    public void processClientPacket(final Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandler.handleAllayMapDataUpdate(this.data)));
         ctx.get().setPacketHandled(true);
     }
 }

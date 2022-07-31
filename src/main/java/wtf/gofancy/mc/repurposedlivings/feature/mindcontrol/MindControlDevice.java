@@ -20,17 +20,17 @@ import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
  */
 public class MindControlDevice extends Item {
 
-    public MindControlDevice(Properties properties) {
+    public MindControlDevice(final Properties properties) {
         super(properties.stacksTo(1));
     }
 
-    public InteractionResult interactLivingEntityFirst(LivingEntity entity, ItemStack stack) {
+    public InteractionResult interactLivingEntityFirst(final LivingEntity entity, final ItemStack stack) {
         // If applied on an Allay at a valid time, replace it with our modified variant
         if (entity.getType() == EntityType.ALLAY && canAttachToAllay((Allay) entity)) {
             ((Allay) entity).dropEquipment();
             
             if (entity.level instanceof ServerLevel serverLevel) {
-                HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), entity.level);
+                final HijackedAllay hijackedAllay = new HijackedAllay(ModSetup.HIJACKED_ALLAY_ENTITY.get(), entity.level);
                 // Copy position and body rotation
                 hijackedAllay.moveTo(entity.position());
                 hijackedAllay.setXRot(entity.getXRot());
@@ -54,7 +54,7 @@ public class MindControlDevice extends Item {
         return InteractionResult.FAIL;
     }
 
-    public boolean canAttachToAllay(Allay allay) {
+    public boolean canAttachToAllay(final Allay allay) {
         // Can only hijack dancing allays
         return allay.isDancing();
     }

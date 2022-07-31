@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class AllayMapDataStorage implements AllayMapDataCapability {
-
     public static final Codec<Map<Integer, AllayMapData>> CODEC = Codec.unboundedMap(Codec.STRING.xmap(Integer::valueOf, String::valueOf), AllayMapData.CODEC);
 
     private Map<Integer, AllayMapData> storage;
@@ -20,12 +19,12 @@ public class AllayMapDataStorage implements AllayMapDataCapability {
     }
 
     @Override
-    public Optional<AllayMapData> get(int mapId) {
+    public Optional<AllayMapData> get(final int mapId) {
         return Optional.ofNullable(this.storage.get(mapId));
     }
 
     @Override
-    public void set(int mapId, AllayMapData data) {
+    public void set(final int mapId, final AllayMapData data) {
         this.storage.put(mapId, data);
     }
 
@@ -35,7 +34,7 @@ public class AllayMapDataStorage implements AllayMapDataCapability {
     }
 
     @Override
-    public void deserializeNBT(Tag nbt) {
+    public void deserializeNBT(final Tag nbt) {
         this.storage = new HashMap<>(CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, msg -> {}));
     }
 }

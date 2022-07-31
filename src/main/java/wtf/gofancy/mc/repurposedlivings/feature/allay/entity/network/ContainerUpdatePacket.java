@@ -15,11 +15,10 @@ import java.util.function.Supplier;
 
 public record ContainerUpdatePacket(int entityId, List<ItemStack> stacks) {
     
-    public void encode(FriendlyByteBuf buf) {
+    public void encode(final FriendlyByteBuf buf) {
         buf.writeInt(this.entityId);
-        
-        CompoundTag tag = new CompoundTag();
-        ListTag data = new ListTag();
+        final CompoundTag tag = new CompoundTag();
+        final ListTag data = new ListTag();
         this.stacks.stream()
             .map(stack -> stack.save(new CompoundTag()))
             .forEach(data::add);
@@ -27,22 +26,18 @@ public record ContainerUpdatePacket(int entityId, List<ItemStack> stacks) {
         buf.writeNbt(tag);
     }
 
-    public static ContainerUpdatePacket decode(FriendlyByteBuf buf) {
-        int entityId = buf.readInt();
-        CompoundTag tag = buf.readNbt();
-        ListTag data = tag.getList("data", Tag.TAG_COMPOUND);
-        List<ItemStack> stacks = data.stream()
+    public static ContainerUpdatePacket decode(final FriendlyByteBuf buf) {
+        final int entityId = buf.readInt();
+        final CompoundTag tag = buf.readNbt();
+        final ListTag data = tag.getList("data", Tag.TAG_COMPOUND);
+        final List<ItemStack> stacks = data.stream()
             .map(nbt -> ItemStack.of((CompoundTag) nbt))
             .toList();
         return new ContainerUpdatePacket(entityId, stacks);
     }
 
-    public void processClientPacket(Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() ->
-            DistExecutor.unsafeRunWhenOn(
-                Dist.CLIENT,
-                () -> () -> ClientPacketHandler.handleContainerUpdate(this)
-            ));
+    public void processClientPacket(final Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandler.handleContainerUpdate(this)));
         ctx.get().setPacketHandled(true);
     }
 }

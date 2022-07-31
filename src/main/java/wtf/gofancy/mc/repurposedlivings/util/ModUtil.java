@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.Optional;
 
 public final class ModUtil {
-    public static boolean isContainer(Level level, BlockPos pos, Direction side) {
+    public static boolean isContainer(final Level level, final BlockPos pos, final Direction side) {
         return Optional.ofNullable(level.getBlockEntity(pos))
             .flatMap(be -> be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side).resolve())
             .isPresent();
     }
 
-    public static void updateContainerContent(Container container, List<ItemStack> stacks) {
-        int containerSize = container.getContainerSize();
+    public static void updateContainerContent(final Container container, final List<ItemStack> stacks) {
+        final int containerSize = container.getContainerSize();
         if (containerSize != stacks.size()) {
             throw new IllegalStateException("Invalid container size " + container.getContainerSize() + ", expected " + stacks.size());
         }

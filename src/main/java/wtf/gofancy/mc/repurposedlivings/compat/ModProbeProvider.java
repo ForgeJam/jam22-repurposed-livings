@@ -19,7 +19,7 @@ public class ModProbeProvider implements IProbeInfoEntityProvider, Function<IThe
     public static final ResourceLocation ID = new ResourceLocation(RepurposedLivings.MODID, "probe");
     
     @Override
-    public Void apply(ITheOneProbe probe) {
+    public Void apply(final ITheOneProbe probe) {
         probe.registerEntityProvider(this);
         
         return null;
@@ -31,7 +31,7 @@ public class ModProbeProvider implements IProbeInfoEntityProvider, Function<IThe
     }
 
     @Override
-    public void addProbeEntityInfo(ProbeMode probeMode, IProbeInfo info, Player player, Level level, Entity entity, IProbeHitEntityData hitEntityData) {
+    public void addProbeEntityInfo(final ProbeMode probeMode, final IProbeInfo info, final Player player, final Level level, final Entity entity, final IProbeHitEntityData hitEntityData) {
         if (entity instanceof HijackedAllay allay) {
             showEquipmentSlots(info, allay);
             
@@ -41,27 +41,27 @@ public class ModProbeProvider implements IProbeInfoEntityProvider, Function<IThe
         }
     }
     
-    private void showEquipmentSlots(IProbeInfo info, HijackedAllay allay) {
+    private void showEquipmentSlots(final IProbeInfo info, final HijackedAllay allay) {
         // Draw equipment slots
         info.text(TranslationUtils.get("probe", "equipment"), info.defaultTextStyle().topPadding(1));
-        IProbeInfo vertical = info.vertical(info.defaultLayoutStyle().bottomPadding(-3).borderColor(-16750951).spacing(0));
-        IProbeInfo horizontal = vertical.horizontal(new LayoutStyle().spacing(0));
+        final IProbeInfo vertical = info.vertical(info.defaultLayoutStyle().bottomPadding(-3).borderColor(-16750951).spacing(0));
+        final IProbeInfo horizontal = vertical.horizontal(new LayoutStyle().spacing(0));
 
         allay.getEquipmentSlots().stream()
             .filter(stack -> !stack.isEmpty())
             .forEach(horizontal::item);
     }
     
-    private void showCarriedItems(IProbeInfo info, HijackedAllay allay) {
+    private void showCarriedItems(final IProbeInfo info, final HijackedAllay allay) {
         // Draw mainhand item + extended inventory
-        List<ItemStack> inventory = Stream.concat(Stream.of(allay.getMainHandItem()), allay.getExtendedInventoryContent().stream())
+        final List<ItemStack> inventory = Stream.concat(Stream.of(allay.getMainHandItem()), allay.getExtendedInventoryContent().stream())
             .filter(stack -> !stack.isEmpty())
             .toList();
         
         if (!inventory.isEmpty()) {
             info.text(TranslationUtils.get("probe", "carrying"), info.defaultTextStyle().topPadding(1));
-            IProbeInfo vertical = info.vertical(info.defaultLayoutStyle().bottomPadding(-3).borderColor(-16750951).spacing(0));
-            IProbeInfo horizontal = vertical.horizontal(new LayoutStyle().spacing(0));
+            final IProbeInfo vertical = info.vertical(info.defaultLayoutStyle().bottomPadding(-3).borderColor(-16750951).spacing(0));
+            final IProbeInfo horizontal = vertical.horizontal(new LayoutStyle().spacing(0));
 
             inventory.forEach(horizontal::item);   
         }

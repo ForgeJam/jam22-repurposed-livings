@@ -69,7 +69,7 @@ public final class ModSetup {
     public static final RegistryObject<RecipeSerializer<AllayMapCloneRecipe>> ALLAY_MAP_CLONE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("allay_map_clone", () -> new SimpleRecipeSerializer<>(AllayMapCloneRecipe::new));
     public static final RegistryObject<RecipeSerializer<AllayMapExtendingRecipe>> ALLAY_MAP_EXTENDING_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("allay_map_extending", () -> new SimpleRecipeSerializer<>(AllayMapExtendingRecipe::new));
 
-    static void register(IEventBus bus) {
+    static void register(final IEventBus bus) {
         ITEMS.register(bus);
         MEMORY_MODULE_TYPES.register(bus);
         ACTIVITIES.register(bus);

@@ -25,7 +25,7 @@ public class GoToItemTarget<E extends Mob> extends Behavior<E> {
    private final Function<E, Float> speedModifier;
    private final Predicate<E> condition;
 
-   public GoToItemTarget(MemoryModuleType<ItemTarget> itemTargetMemory, Function<E, Float> speedModifier, Predicate<E> condition) {
+   public GoToItemTarget(final MemoryModuleType<ItemTarget> itemTargetMemory, final Function<E, Float> speedModifier, final Predicate<E> condition) {
       super(ImmutableMap.of(itemTargetMemory, MemoryStatus.VALUE_PRESENT, MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.IS_PANICKING, MemoryStatus.VALUE_ABSENT));
       this.itemTargetMemory = itemTargetMemory;
       this.speedModifier = speedModifier;
@@ -33,19 +33,19 @@ public class GoToItemTarget<E extends Mob> extends Behavior<E> {
    }
 
    @Override
-   protected boolean checkExtraStartConditions(ServerLevel level, E owner) {
+   protected boolean checkExtraStartConditions(final ServerLevel level, final E owner) {
       return this.condition.test(owner);
    }
 
    @Override
-   protected void start(ServerLevel level, E mob, long gameTime) {
-      Brain<?> brain = mob.getBrain();
-      ItemTarget itemTarget = brain.getMemory(this.itemTargetMemory).orElseThrow(); 
-      BlockPos lookPos = itemTarget.pos();
-      BlockPos walkPos = itemTarget.getRelativePos();
-      PositionTracker lookTarget = new BlockPosTracker(lookPos);
-      float speedModifier = this.speedModifier.apply(mob);
-      WalkTarget walkTarget = new WalkTarget(new BlockPosTracker(walkPos), speedModifier, 0);
+   protected void start(final ServerLevel level, final E mob, final long gameTime) {
+      final Brain<?> brain = mob.getBrain();
+      final ItemTarget itemTarget = brain.getMemory(this.itemTargetMemory).orElseThrow(); 
+      final BlockPos lookPos = itemTarget.pos();
+      final BlockPos walkPos = itemTarget.getRelativePos();
+      final PositionTracker lookTarget = new BlockPosTracker(lookPos);
+      final float speedModifier = this.speedModifier.apply(mob);
+      final WalkTarget walkTarget = new WalkTarget(new BlockPosTracker(walkPos), speedModifier, 0);
       
       brain.setMemory(MemoryModuleType.LOOK_TARGET, lookTarget);
       brain.setMemory(MemoryModuleType.WALK_TARGET, walkTarget);

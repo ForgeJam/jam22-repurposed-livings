@@ -16,7 +16,7 @@ import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.behavior.GoToItemTa
 
 public class HijackedAllayAi extends AllayAi {
 
-    public static Brain<?> createBrain(Brain<HijackedAllay> brain) {
+    public static Brain<?> createBrain(final Brain<HijackedAllay> brain) {
         initCoreActivity(brain);
         initIdleActivity(brain);
         initItemTransferActivity(brain);
@@ -26,7 +26,7 @@ public class HijackedAllayAi extends AllayAi {
         return brain;
     }
 
-    private static void initCoreActivity(Brain<HijackedAllay> brain) {
+    private static void initCoreActivity(final Brain<HijackedAllay> brain) {
         brain.addActivity(Activity.CORE, 0, ImmutableList.of(
             new Swim(0.8F),
             new AnimalPanic(2.5F),
@@ -35,7 +35,7 @@ public class HijackedAllayAi extends AllayAi {
         ));
     }
     
-    private static void initIdleActivity(Brain<HijackedAllay> brain) {
+    private static void initIdleActivity(final Brain<HijackedAllay> brain) {
         brain.addActivityWithConditions(
             Activity.IDLE,
             ImmutableList.of(
@@ -48,7 +48,7 @@ public class HijackedAllayAi extends AllayAi {
         );
     }
     
-    private static void initItemTransferActivity(Brain<HijackedAllay> brain) {
+    private static void initItemTransferActivity(final Brain<HijackedAllay> brain) {
         brain.addActivityWithConditions(
             ModSetup.ALLAY_TRANSFER_ITEMS.get(),
             ImmutableList.of(

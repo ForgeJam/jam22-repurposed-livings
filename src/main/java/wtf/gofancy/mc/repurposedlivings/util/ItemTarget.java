@@ -15,17 +15,17 @@ public record ItemTarget(BlockPos pos, Direction side) {
         Direction.CODEC.fieldOf("side").forGetter(ItemTarget::side)
     ).apply(instance, ItemTarget::new));
     
-    public static ItemTarget fromNbt(CompoundTag tag) {
-        DataResult<ItemTarget> result = ItemTarget.CODEC.parse(NbtOps.INSTANCE, tag);
+    public static ItemTarget fromNbt(final CompoundTag tag) {
+        final DataResult<ItemTarget> result = ItemTarget.CODEC.parse(NbtOps.INSTANCE, tag);
         return result.getOrThrow(false, str -> {});
     }
 
     public CompoundTag serializeNbt() {
-        DataResult<Tag> result = ItemTarget.CODEC.encodeStart(NbtOps.INSTANCE, this);
+        final DataResult<Tag> result = ItemTarget.CODEC.encodeStart(NbtOps.INSTANCE, this);
         return (CompoundTag) result.getOrThrow(false, str -> {});
     }
     
-    public ItemTarget withSide(Direction side) {
+    public ItemTarget withSide(final Direction side) {
         return new ItemTarget(pos(), side);
     }
 

@@ -14,13 +14,13 @@ public class HijackedAllayRenderer extends AllayRenderer {
     private static final ResourceLocation MIND_CONTROL_DEVICE_TEXTURE = RepurposedLivings.rl( "textures/entity/mind_control_device.png");
     private static final ResourceLocation ECHO_MIND_CONTROL_DEVICE_TEXTURE = RepurposedLivings.rl("textures/entity/echo_mind_control_device.png");
 
-    public HijackedAllayRenderer(EntityRendererProvider.Context context) {
+    public HijackedAllayRenderer(final EntityRendererProvider.Context context) {
         super(context);
         addLayer(new AllayHelmetLayer<>(this, context, MindControlDeviceModel.LAYER_LOCATION, MIND_CONTROL_DEVICE_TEXTURE, allay -> hasMindControlDevice(allay, ModSetup.MIND_CONTROL_DEVICE.get())));
         addLayer(new AllayHelmetLayer<>(this, context, MindControlDeviceModel.LAYER_LOCATION, ECHO_MIND_CONTROL_DEVICE_TEXTURE, allay -> hasMindControlDevice(allay, ModSetup.ECHO_MIND_CONTROL_DEVICE.get())));
     }
     
-    public boolean hasMindControlDevice(Allay allay, Item item) {
+    public boolean hasMindControlDevice(final Allay allay, final Item item) {
         return ((HijackedAllay) allay).getItemInSlot(AllayEquipment.CONTROLLER).getItem() == item;
     }
 }

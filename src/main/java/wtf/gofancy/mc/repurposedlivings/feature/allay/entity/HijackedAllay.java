@@ -74,13 +74,13 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
      */
     private final SimpleContainer extendedInventory = new SimpleContainer(3);
 
-    public HijackedAllay(EntityType<? extends HijackedAllay> type, Level level) {
+    public HijackedAllay(final EntityType<? extends HijackedAllay> type, final Level level) {
         super(type, level);
         
         if (!this.level.isClientSide) this.extendedInventory.addListener(this::onExtendedInventoryChanged);
     }
     
-    public ItemStack getItemInSlot(AllayEquipment slot) {
+    public ItemStack getItemInSlot(final AllayEquipment slot) {
         return getEquipmentSlots().get(slot.ordinal());
     }
 
@@ -88,10 +88,10 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
         return this.entityData.get(EQUIPMENT_SLOTS);
     }
 
-    public void setEquipmentSlot(AllayEquipment slot, ItemStack stack) {
-        int index = slot.ordinal();
-        ItemStack result = getEquipmentSlots().set(index, stack);
-        boolean empty = stack.isEmpty() && result.isEmpty();
+    public void setEquipmentSlot(final AllayEquipment slot, final ItemStack stack) {
+        final int index = slot.ordinal();
+        final ItemStack result = getEquipmentSlots().set(index, stack);
+        final boolean empty = stack.isEmpty() && result.isEmpty();
         if (!empty && !ItemStack.isSameIgnoreDurability(stack, result)) {
             playEquipSound(stack);
         }
@@ -108,14 +108,14 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public void writeSpawnData(FriendlyByteBuf buf) {
-        ContainerUpdatePacket packet = new ContainerUpdatePacket(0, getExtendedInventoryContent());
+    public void writeSpawnData(final FriendlyByteBuf buf) {
+        final ContainerUpdatePacket packet = new ContainerUpdatePacket(0, getExtendedInventoryContent());
         packet.encode(buf);
     }
 
     @Override
-    public void readSpawnData(FriendlyByteBuf buf) {
-        ContainerUpdatePacket packet = ContainerUpdatePacket.decode(buf);
+    public void readSpawnData(final FriendlyByteBuf buf) {
+        final ContainerUpdatePacket packet = ContainerUpdatePacket.decode(buf);
         ModUtil.updateContainerContent(this.extendedInventory, packet.stacks());
     }
 
@@ -131,8 +131,8 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-        Brain<?> brain = brainProvider().makeBrain(dynamic);
+    protected Brain<?> makeBrain(final Dynamic<?> dynamic) {
+        final Brain<?> brain = brainProvider().makeBrain(dynamic);
         return HijackedAllayAi.createBrain((Brain<HijackedAllay>) brain);
     }
 
@@ -143,7 +143,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public boolean wantsToPickUp(ItemStack stack) {
+    public boolean wantsToPickUp(final ItemStack stack) {
         // Disable automatic item pickup
         return false;
     }
@@ -155,18 +155,18 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-        ItemStack stack = player.getMainHandItem();
-        ItemStack map = getItemInSlot(AllayEquipment.MAP);
+    protected InteractionResult mobInteract(final Player player, final InteractionHand hand) {
+        final ItemStack stack = player.getMainHandItem();
+        final ItemStack map = getItemInSlot(AllayEquipment.MAP);
         // Un-hijack allay by shift-clicking it with an empty hand
         if (stack.isEmpty() && player.isShiftKeyDown()) {
             removeHijack();
             return InteractionResult.SUCCESS;
         }
         // Give the Allay an Allay Map
-        ItemStack handStack = !stack.isEmpty() ? stack : player.getOffhandItem();
+        final ItemStack handStack = !stack.isEmpty() ? stack : player.getOffhandItem();
         if (handStack.is(ModSetup.ALLAY_MAP.get()) && map.isEmpty()) {
-            InteractionHand actionHand = !stack.isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+            final InteractionHand actionHand = !stack.isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
             return takeAllayMapFrom(player, actionHand, handStack);
         }
         // Take an Allay Map from the Allay
@@ -174,7 +174,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
             return giveAllayMapTo(player, map);
         }
         // Apply the upgrades to the Allay
-        AllayEquipment upgradeSlot = UPGRADES.get(stack.getItem());
+        final AllayEquipment upgradeSlot = UPGRADES.get(stack.getItem());
         if (upgradeSlot != null) {
             setEquipmentSlot(upgradeSlot, stack);
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
@@ -216,13 +216,13 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(final CompoundTag tag) {
         super.addAdditionalSaveData(tag);
 
         // Save equipment slots to NBT
-        ListTag list = new ListTag();
-        for (ItemStack stack : getEquipmentSlots()) {
-            CompoundTag stackTag = new CompoundTag();
+        final ListTag list = new ListTag();
+        for (final ItemStack stack : getEquipmentSlots()) {
+            final CompoundTag stackTag = new CompoundTag();
             if (!stack.isEmpty()) stack.save(stackTag);
             list.add(stackTag);
         }
@@ -233,14 +233,14 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
+    public void readAdditionalSaveData(final CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         
         // Load equipment slots from NBT
         if (tag.contains("EquipmentSlots", Tag.TAG_LIST)) {
-            ListTag list = tag.getList("EquipmentSlots", Tag.TAG_COMPOUND);
+            final ListTag list = tag.getList("EquipmentSlots", Tag.TAG_COMPOUND);
 
-            NonNullList<ItemStack> equipmentSlots = getEquipmentSlots();
+            final NonNullList<ItemStack> equipmentSlots = getEquipmentSlots();
             for (int i = 0; i < equipmentSlots.size(); ++i) {
                 equipmentSlots.set(i, ItemStack.of(list.getCompound(i)));
             }
@@ -266,11 +266,11 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
      * @param range the range to search in
      * @return optional IItemHandler
      */
-    private Optional<IItemHandler> getTargetItemHandler(MemoryModuleType<ItemTarget> memory, double range) {
+    private Optional<IItemHandler> getTargetItemHandler(final MemoryModuleType<ItemTarget> memory, final double range) {
         return this.brain.getMemory(memory)
             .filter(target -> {
-                BlockPos pos = target.pos();
-                HitResult result = this.level.clip(new ClipContext(this.position(), new Vec3(pos.getX(), pos.getY(), pos.getZ()), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this));
+                final BlockPos pos = target.pos();
+                final HitResult result = this.level.clip(new ClipContext(this.position(), new Vec3(pos.getX(), pos.getY(), pos.getZ()), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this));
                 return result instanceof BlockHitResult blockHit && blockHit.getDirection() == target.side() && this.blockPosition().distSqr(pos) <= Mth.square(range);
             })
             .map(target -> this.level.getBlockEntity(target.pos()))
@@ -290,9 +290,9 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
      * 
      * @param itemHandler the container to extract items from
      */
-    private void pickupItems(IItemHandler itemHandler) {
+    private void pickupItems(final IItemHandler itemHandler) {
         for (int i = 0; i < itemHandler.getSlots(); i++) {
-            ItemStack stack = itemHandler.extractItem(i, Integer.MAX_VALUE, true);
+            final ItemStack stack = itemHandler.extractItem(i, Integer.MAX_VALUE, true);
             if (!stack.isEmpty()) {
                 if (!hasItemInHand()) {
                     setItemInHandSynced(itemHandler.extractItem(i, Integer.MAX_VALUE, false));
@@ -309,14 +309,14 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
      * 
      * @param itemHandler the container to insert items into
      */
-    private void deliverItems(IItemHandler itemHandler) {
-        ItemStack itemInHand = getItemInHand(InteractionHand.MAIN_HAND);
+    private void deliverItems(final IItemHandler itemHandler) {
+        final ItemStack itemInHand = getItemInHand(InteractionHand.MAIN_HAND);
         // Try inserting the item from our hand
         ItemStack remainder = insertStack(itemHandler, itemInHand);
         // If there's no remainder, set it to the next item from our inventory to be inserted next tick
         if (remainder.isEmpty() && hasStorageUpgrade()) {
             for (int i = 0; i < this.extendedInventory.getContainerSize(); i++) {
-                ItemStack next = this.extendedInventory.removeItem(i, Integer.MAX_VALUE);
+                final ItemStack next = this.extendedInventory.removeItem(i, Integer.MAX_VALUE);
                 if (!next.isEmpty()) {
                     remainder = next;
                     break;
@@ -334,7 +334,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
      * @param stack the stack to insert
      * @return the remainer, or an empty stack if there's none
      */
-    private ItemStack insertStack(IItemHandler handler, ItemStack stack) {
+    private ItemStack insertStack(final IItemHandler handler, final ItemStack stack) {
         ItemStack inserted = stack;
         for (int i = 0; i < handler.getSlots() && !inserted.isEmpty(); i++) {
             inserted = handler.insertItem(i, inserted, false);
@@ -346,7 +346,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
         dropEquipment();
         if (this.level instanceof ServerLevel serverLevel) {
             // Replace hijacked allay with a normal one
-            Allay allay = new Allay(EntityType.ALLAY, this.level);
+            final Allay allay = new Allay(EntityType.ALLAY, this.level);
             // Copy position and body rotation
             allay.moveTo(position());
             allay.setXRot(getXRot());
@@ -358,29 +358,18 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
 
             remove(RemovalReason.DISCARDED);
             this.level.addFreshEntity(allay);
-            serverLevel.sendParticles(
-                ParticleTypes.HAPPY_VILLAGER,
-                getX(),
-                getY() + 0.2,
-                getZ(),
-                10,
-                0.25,
-                0.25,
-                0.25,
-                0
-            );
+            serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 0.2, getZ(), 10, 0.25, 0.25, 0.25, 0);
             serverLevel.playSound(null, allay, ModSetup.MIND_CONTROL_DEVICE_DETACH_SOUND.get(), SoundSource.MASTER, 0.5f, 1);
         }
     }
     
-    private InteractionResult takeAllayMapFrom(Player player, InteractionHand playerHand, ItemStack stack) {
+    private InteractionResult takeAllayMapFrom(final Player player, final InteractionHand playerHand, final ItemStack stack) {
         return player.level.getCapability(Capabilities.ALLAY_MAP_DATA).resolve()
             .flatMap(data -> data.get(stack))
             .map(data -> {
                 if (!data.isComplete()) {
                     if (player instanceof ServerPlayer serverPlayer) {
-                        serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete")
-                            .withStyle(ChatFormatting.RED), true);
+                        serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete").withStyle(ChatFormatting.RED), true);
                     }
                     return InteractionResult.CONSUME;
                 }
@@ -397,7 +386,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
             .orElseThrow();
     }
     
-    private InteractionResult giveAllayMapTo(Player player, ItemStack stack) {
+    private InteractionResult giveAllayMapTo(final Player player, final ItemStack stack) {
         this.brain.eraseMemory(ModSetup.ALLAY_SOURCE_TARET.get());
         this.brain.eraseMemory(ModSetup.ALLAY_DELIVERY_TARET.get());
         this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
@@ -411,12 +400,12 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
         return InteractionResult.SUCCESS;
     }
     
-    private void setItemInHandSynced(ItemStack stack) {
+    private void setItemInHandSynced(final ItemStack stack) {
         setItemInHand(InteractionHand.MAIN_HAND, stack);
         Network.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new SetItemInHandPacket(getId(), stack));
     }
     
-    private void onExtendedInventoryChanged(Container container) {
+    private void onExtendedInventoryChanged(final Container container) {
         Network.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ContainerUpdatePacket(getId(), getExtendedInventoryContent()));
     }
 }

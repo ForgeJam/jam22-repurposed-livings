@@ -11,23 +11,19 @@ import java.util.function.Supplier;
 
 public record SetItemInHandPacket(int entityId, ItemStack stack) {
 
-    public void encode(FriendlyByteBuf buf) {
+    public void encode(final FriendlyByteBuf buf) {
         buf.writeInt(this.entityId);
         buf.writeItem(this.stack);
     }
 
-    public static SetItemInHandPacket decode(FriendlyByteBuf buf) {
-        int entityId = buf.readInt();
-        ItemStack stack = buf.readItem();
+    public static SetItemInHandPacket decode(final FriendlyByteBuf buf) {
+        final int entityId = buf.readInt();
+        final ItemStack stack = buf.readItem();
         return new SetItemInHandPacket(entityId, stack);
     }
 
-    public void processClientPacket(Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() ->
-                DistExecutor.unsafeRunWhenOn(
-                        Dist.CLIENT,
-                        () -> () -> ClientPacketHandler.handleSetItemInHand(this)
-                ));
+    public void processClientPacket(final Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandler.handleSetItemInHand(this)));
         ctx.get().setPacketHandled(true);
     }
 }

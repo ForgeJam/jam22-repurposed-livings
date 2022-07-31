@@ -8,12 +8,12 @@ import net.minecraft.world.entity.animal.allay.Allay;
  */
 public class EchoMindControlDevice extends MindControlDevice {
 
-    public EchoMindControlDevice(Properties properties) {
+    public EchoMindControlDevice(final Properties properties) {
         super(properties);
     }
 
     @Override
-    public boolean canAttachToAllay(Allay allay) {
+    public boolean canAttachToAllay(final Allay allay) {
         // Can hijack allays at any time
         return true;
     }

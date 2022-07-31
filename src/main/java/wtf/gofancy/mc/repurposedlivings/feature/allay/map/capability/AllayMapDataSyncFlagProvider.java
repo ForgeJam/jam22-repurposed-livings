@@ -17,25 +17,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class AllayMapDataSyncFlagProvider implements ICapabilityProvider, INBTSerializable<Tag> {
-
     private static class SyncFlag implements AllayMapDataSyncFlagCapability {
-
         public static final Codec<Set<Integer>> CODEC = Codec.list(Codec.INT).xmap(HashSet::new, ArrayList::new);
 
         private Set<Integer> synced = new HashSet<>();
 
         @Override
-        public boolean requiresSync(int mapId) {
+        public boolean requiresSync(final int mapId) {
             return !this.synced.contains(mapId);
         }
 
         @Override
-        public void setSynced(int mapId) {
+        public void setSynced(final int mapId) {
             this.synced.add(mapId);
         }
 
         @Override
-        public void invalidate(int mapId) {
+        public void invalidate(final int mapId) {
             this.synced.remove(mapId);
         }
 
@@ -50,7 +48,7 @@ public class AllayMapDataSyncFlagProvider implements ICapabilityProvider, INBTSe
         }
 
         @Override
-        public void deserializeNBT(Tag nbt) {
+        public void deserializeNBT(final Tag nbt) {
             this.synced = CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow(false, str -> {});
         }
     }
@@ -59,7 +57,7 @@ public class AllayMapDataSyncFlagProvider implements ICapabilityProvider, INBTSe
     private final LazyOptional<AllayMapDataSyncFlagCapability> optional = LazyOptional.of(() -> instance);
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull final Capability<T> cap, @Nullable final Direction side) {
         return Capabilities.ALLAY_MAP_DATA_SYNC_FLAG.orEmpty(cap, this.optional);
     }
 
@@ -69,7 +67,7 @@ public class AllayMapDataSyncFlagProvider implements ICapabilityProvider, INBTSe
     }
 
     @Override
-    public void deserializeNBT(Tag nbt) {
+    public void deserializeNBT(final Tag nbt) {
         this.instance.deserializeNBT(nbt);
     }
 }

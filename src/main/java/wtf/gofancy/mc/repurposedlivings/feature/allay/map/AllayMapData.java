@@ -13,20 +13,11 @@ import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 import java.util.Optional;
 
 public class AllayMapData {
-
     public static final Codec<AllayMapData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.INT.fieldOf("mapId").forGetter(AllayMapData::getMapId),
-                    ItemTarget.CODEC.optionalFieldOf("source").forGetter(AllayMapData::getSource),
-                    ItemTarget.CODEC.optionalFieldOf("destination").forGetter(AllayMapData::getDestination)
-            )
-            .apply(
-                    instance,
-                    (mapId, source, destination) -> new AllayMapData(
-                            mapId,
-                            source.orElse(null),
-                            destination.orElse(null)
-                    )
-            ));
+        Codec.INT.fieldOf("mapId").forGetter(AllayMapData::getMapId),
+        ItemTarget.CODEC.optionalFieldOf("source").forGetter(AllayMapData::getSource),
+        ItemTarget.CODEC.optionalFieldOf("destination").forGetter(AllayMapData::getDestination)
+    ).apply(instance, (mapId, source, destination) -> new AllayMapData(mapId, source.orElse(null), destination.orElse(null))));
 
     public AllayMapData(final int mapId) {
         this.dirty = false;
@@ -35,7 +26,7 @@ public class AllayMapData {
         this.destination = null;
     }
 
-    private AllayMapData(int mapId, ItemTarget source, ItemTarget destination) {
+    private AllayMapData(final int mapId, final ItemTarget source, final ItemTarget destination) {
         this.dirty = true;
         this.mapId = mapId;
         this.source = source;
@@ -66,7 +57,7 @@ public class AllayMapData {
         return Optional.ofNullable(this.destination);
     }
 
-    public void setDestination(ItemTarget destination) {
+    public void setDestination(final ItemTarget destination) {
         this.destination = destination;
         this.dirty = true;
     }
@@ -78,31 +69,30 @@ public class AllayMapData {
     public void tick(final Level level) {
         if (!this.dirty) return;
 
-        final var map = this.getCorrespondingMapData(level);
+        final MapItemSavedData map = getCorrespondingMapData(level);
 
-        this.getSource().ifPresent(source -> map.addDecoration(
-                MapDecoration.Type.TARGET_POINT,
-                null,
-                "source",
-                source.pos().getX(),
-                source.pos().getZ(),
-                0.0,
-                TranslationUtils.generic("source")
+        getSource().ifPresent(source -> map.addDecoration(
+            MapDecoration.Type.TARGET_POINT,
+            null,
+            "source",
+            source.pos().getX(),
+            source.pos().getZ(),
+            0.0,
+            TranslationUtils.generic("source")
         ));
-        this.getDestination().ifPresent(destination -> map.addDecoration(
-                MapDecoration.Type.TARGET_X,
-                null,
-                "destination",
-                destination.pos().getX(),
-                destination.pos().getZ(),
-                0.0,
-                TranslationUtils.generic("destination")
+        getDestination().ifPresent(destination -> map.addDecoration(
+            MapDecoration.Type.TARGET_X,
+            null,
+            "destination",
+            destination.pos().getX(),
+            destination.pos().getZ(),
+            0.0,
+            TranslationUtils.generic("destination")
         ));
 
-        level.players()
-                .stream()
-                .map(player -> player.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow())
-                .forEach(syncFlag -> syncFlag.invalidate(this.mapId));
+        level.players().stream()
+            .flatMap(player -> player.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().stream())
+            .forEach(syncFlag -> syncFlag.invalidate(this.mapId));
 
         this.dirty = false;
     }
@@ -114,8 +104,8 @@ public class AllayMapData {
     public AllayMapData newInstanceFor(final int newMapId) {
         final AllayMapData data = new AllayMapData(newMapId);
 
-        this.getSource().ifPresent(data::setSource);
-        this.getDestination().ifPresent(data::setDestination);
+        getSource().ifPresent(data::setSource);
+        getDestination().ifPresent(data::setDestination);
 
         return data;
     }

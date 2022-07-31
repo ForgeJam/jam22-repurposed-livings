@@ -29,7 +29,7 @@ public class RepurposedLivings {
     }
 
     public RepurposedLivings() {
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        final IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(this::onEntityAttributeCreation);
         bus.addListener(this::registerCapabilities);
         bus.addListener(this::enqueIMC);
@@ -40,16 +40,16 @@ public class RepurposedLivings {
         MinecraftForge.EVENT_BUS.register(new EventHandler());
     }
     
-    public void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
+    public void onEntityAttributeCreation(final EntityAttributeCreationEvent event) {
         event.put(ModSetup.HIJACKED_ALLAY_ENTITY.get(), HijackedAllay.createAttributes().build());
     }
 
-    public void registerCapabilities(RegisterCapabilitiesEvent event) {
+    public void registerCapabilities(final RegisterCapabilitiesEvent event) {
         event.register(AllayMapDataCapability.class);
         event.register(AllayMapDataSyncFlagCapability.class);
     }
     
-    public void enqueIMC(InterModEnqueueEvent event) {
+    public void enqueIMC(final InterModEnqueueEvent event) {
         if (ModList.get().isLoaded(THEONEPROBE_MODID)) {
             InterModComms.sendTo(THEONEPROBE_MODID, "getTheOneProbe", ModProbeProvider::new);
         }

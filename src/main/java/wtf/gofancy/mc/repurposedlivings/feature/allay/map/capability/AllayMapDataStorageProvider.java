@@ -11,12 +11,11 @@ import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.Capabilities;
 
 public class AllayMapDataStorageProvider implements ICapabilityProvider, INBTSerializable<Tag> {
-
     private final AllayMapDataCapability instance = new AllayMapDataStorage();
     private final LazyOptional<AllayMapDataCapability> optional = LazyOptional.of(() -> instance);
 
     @Override
-    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull final Capability<T> cap, @Nullable final Direction side) {
         return Capabilities.ALLAY_MAP_DATA.orEmpty(cap, this.optional);
     }
 
@@ -26,7 +25,7 @@ public class AllayMapDataStorageProvider implements ICapabilityProvider, INBTSer
     }
 
     @Override
-    public void deserializeNBT(Tag nbt) {
+    public void deserializeNBT(final Tag nbt) {
         this.instance.deserializeNBT(nbt);
     }
 }

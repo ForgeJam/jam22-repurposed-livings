@@ -11,12 +11,12 @@ import wtf.gofancy.mc.repurposedlivings.client.render.MindControlDeviceModel;
 public final class ModClientSetup {
 
     @SubscribeEvent
-    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+    public static void registerLayerDefinitions(final EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(MindControlDeviceModel.LAYER_LOCATION, MindControlDeviceModel::createBodyLayer);
     }
 
     @SubscribeEvent
-    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+    public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModSetup.HIJACKED_ALLAY_ENTITY.get(), HijackedAllayRenderer::new);
     }
 }

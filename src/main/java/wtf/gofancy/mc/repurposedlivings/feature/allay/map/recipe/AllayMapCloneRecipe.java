@@ -11,64 +11,69 @@ import wtf.gofancy.mc.repurposedlivings.ModSetup;
 
 public class AllayMapCloneRecipe extends CustomRecipe {
 
-    public AllayMapCloneRecipe(ResourceLocation id) {
+    public AllayMapCloneRecipe(final ResourceLocation id) {
         super(id);
     }
 
     @Override
-    public boolean matches(CraftingContainer container, Level level) {
+    public boolean matches(final CraftingContainer container, final Level level) {
         int cloneCount = 0;
         ItemStack map = ItemStack.EMPTY;
 
         for (int j = 0; j < container.getContainerSize(); ++j) {
-            ItemStack current = container.getItem(j);
+            final ItemStack current = container.getItem(j);
 
-            if (current.isEmpty()) continue;
-
-            if (current.is(ModSetup.ALLAY_MAP.get())) {
-                if (map.isEmpty()) {
-                    map = current;
-                } else return false; // more than one map in crafting grid
-            } else if (current.is(Items.MAP)) {
-                cloneCount++;
-            } else return false; // some not-map in crafting grid
+            if (!current.isEmpty()) {
+                if (current.is(ModSetup.ALLAY_MAP.get())) {
+                    if (map.isEmpty()) {
+                        map = current;
+                    } else {
+                        return false; // more than one map in crafting grid
+                    }
+                } else if (current.is(Items.MAP)) {
+                    cloneCount++;
+                } else {
+                    return false; // some not-map in crafting grid   
+                }
+            }
         }
 
         return !map.isEmpty() && cloneCount > 0;
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer container) {
+    public ItemStack assemble(final CraftingContainer container) {
         int cloneCount = 0;
         ItemStack map = ItemStack.EMPTY;
 
         for (int j = 0; j < container.getContainerSize(); ++j) {
-            ItemStack current = container.getItem(j);
+            final ItemStack current = container.getItem(j);
 
-            if (current.isEmpty()) continue;
-
-            if (current.is(ModSetup.ALLAY_MAP.get())) {
-                if (map.isEmpty()) {
-                    map = current;
-                } else return ItemStack.EMPTY; // more than one map in crafting grid
-            } else if (current.is(Items.MAP)) {
-                cloneCount++;
-            } else return ItemStack.EMPTY; // some not-map in crafting grid
+            if (!current.isEmpty()) {
+                if (current.is(ModSetup.ALLAY_MAP.get())) {
+                    if (map.isEmpty()) {
+                        map = current;
+                    } else {
+                        return ItemStack.EMPTY; // more than one map in crafting grid
+                    }
+                } else if (current.is(Items.MAP)) {
+                    cloneCount++;
+                } else {
+                    return ItemStack.EMPTY; // some not-map in crafting grid
+                }
+            }
         }
-
-        if (map.isEmpty() || cloneCount == 0) return ItemStack.EMPTY;
 
         if (!map.isEmpty() && cloneCount > 0) {
-            ItemStack copy = map.copy();
+            final ItemStack copy = map.copy();
             copy.setCount(cloneCount + 1);
             return copy;
-        } else {
-            return ItemStack.EMPTY;
-        }
+        } 
+        return ItemStack.EMPTY;
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
+    public boolean canCraftInDimensions(final int width, final int height) {
         return width >= 3 && height >= 3;
     }
 
