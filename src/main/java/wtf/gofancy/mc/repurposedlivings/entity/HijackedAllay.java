@@ -121,70 +121,18 @@ public class HijackedAllay extends Allay {
         ItemStack map = getItemInSlot(AllayEquipment.MAP);
         // Un-hijack allay by shift-clicking it with an empty hand
         if (stack.isEmpty() && player.isShiftKeyDown()) {
-            dropEquipment();
-            if (this.level instanceof ServerLevel serverLevel) {
-                // Replace hijacked allay with a normal one
-                Allay allay = new Allay(EntityType.ALLAY, this.level);
-                // Copy position and body rotation
-                allay.moveTo(position());
-                allay.setXRot(getXRot());
-                allay.setYRot(getYRot());
-                allay.setOldPosAndRot();
-                allay.setYBodyRot(getYRot());
-                allay.setYHeadRot(getYRot());
-                allay.setPersistenceRequired();
-
-                remove(RemovalReason.DISCARDED);
-                this.level.addFreshEntity(allay);
-                serverLevel.sendParticles(
-                        ParticleTypes.HAPPY_VILLAGER,
-                        getX(),
-                        getY() + 0.2,
-                        getZ(),
-                        10,
-                        0.25,
-                        0.25,
-                        0.25,
-                        0
-                );
-            }
+            removeHijack();
             return InteractionResult.SUCCESS;
+        }
         // Give the Allay an Allay Map
-        } else if (stack.is(ModSetup.ALLAY_MAP.get()) && map.isEmpty()) {
-            return player.getCapability(Capabilities.ALLAY_MAP_DATA).resolve()
-                    .flatMap(data -> data.get(stack))
-                    .map(data -> {
-                        if (!data.isComplete()) {
-                            if (player instanceof ServerPlayer serverPlayer) {
-                                serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete")
-                                        .withStyle(ChatFormatting.RED), true);
-                            }
-                            return InteractionResult.CONSUME;
-                        }
-
-                        this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), data.getSource().orElseThrow());
-                        this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), data.getDestination().orElseThrow());
-
-                        this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
-
-                        setEquipmentSlot(AllayEquipment.MAP, stack);
-                        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                        return InteractionResult.SUCCESS;
-                    })
-                    .orElseThrow();
+        ItemStack handStack = !stack.isEmpty() ? stack : player.getOffhandItem();
+        if (handStack.is(ModSetup.ALLAY_MAP.get()) && map.isEmpty()) {
+            InteractionHand actionHand = !stack.isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+            return takeAllayMapFrom(player, actionHand, handStack);
         }
         // Take an Allay Map from the Allay
-        else if (stack.isEmpty() && !map.isEmpty()) {
-            this.brain.eraseMemory(ModSetup.ALLAY_SOURCE_TARET.get());
-            this.brain.eraseMemory(ModSetup.ALLAY_DELIVERY_TARET.get());
-            this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
-            
-            spawnAtLocation(getItemInHand(InteractionHand.MAIN_HAND));
-            setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            
-            setEquipmentSlot(AllayEquipment.MAP, ItemStack.EMPTY);
-            player.setItemInHand(InteractionHand.MAIN_HAND, map);
-            return InteractionResult.SUCCESS;
+        if (stack.isEmpty() && !map.isEmpty()) {
+            return giveAllayMapTo(player, map);
         }
         // Apply the upgrades to the Allay
         AllayEquipment upgradeSlot = UPGRADES.get(stack.getItem());
@@ -305,12 +253,12 @@ public class HijackedAllay extends Allay {
      */
     private void pickupItems(IItemHandler itemHandler) {
         for (int i = 0; i < itemHandler.getSlots(); i++) {
-            ItemStack stack = itemHandler.extractItem(i, Integer.MAX_VALUE, false);
+            ItemStack stack = itemHandler.extractItem(i, Integer.MAX_VALUE, true);
             if (!stack.isEmpty()) {
                 if (!hasItemInHand()) {
-                    setItemInHandSynced(stack);
+                    setItemInHandSynced(itemHandler.extractItem(i, Integer.MAX_VALUE, false));
                 } else if (hasStorageUpgrade() && this.extendedInventory.canAddItem(stack)) {
-                    this.extendedInventory.addItem(stack);
+                    this.extendedInventory.addItem(itemHandler.extractItem(i, Integer.MAX_VALUE, false));
                 } else break;
             }
         }
@@ -353,6 +301,73 @@ public class HijackedAllay extends Allay {
             inserted = handler.insertItem(i, inserted, false);
         }
         return inserted;
+    }
+    
+    private void removeHijack() {
+        dropEquipment();
+        if (this.level instanceof ServerLevel serverLevel) {
+            // Replace hijacked allay with a normal one
+            Allay allay = new Allay(EntityType.ALLAY, this.level);
+            // Copy position and body rotation
+            allay.moveTo(position());
+            allay.setXRot(getXRot());
+            allay.setYRot(getYRot());
+            allay.setOldPosAndRot();
+            allay.setYBodyRot(getYRot());
+            allay.setYHeadRot(getYRot());
+            allay.setPersistenceRequired();
+
+            remove(RemovalReason.DISCARDED);
+            this.level.addFreshEntity(allay);
+            serverLevel.sendParticles(
+                ParticleTypes.HAPPY_VILLAGER,
+                getX(),
+                getY() + 0.2,
+                getZ(),
+                10,
+                0.25,
+                0.25,
+                0.25,
+                0
+            );
+        }
+    }
+    
+    private InteractionResult takeAllayMapFrom(Player player, InteractionHand playerHand, ItemStack stack) {
+        return player.level.getCapability(Capabilities.ALLAY_MAP_DATA).resolve()
+            .flatMap(data -> data.get(stack))
+            .map(data -> {
+                if (!data.isComplete()) {
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete")
+                            .withStyle(ChatFormatting.RED), true);
+                    }
+                    return InteractionResult.CONSUME;
+                }
+
+                this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), data.getSource().orElseThrow());
+                this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), data.getDestination().orElseThrow());
+
+                this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
+
+                setEquipmentSlot(AllayEquipment.MAP, stack);
+                player.setItemInHand(playerHand, ItemStack.EMPTY);
+                return InteractionResult.SUCCESS;
+            })
+            .orElseThrow();
+    }
+    
+    private InteractionResult giveAllayMapTo(Player player, ItemStack stack) {
+        this.brain.eraseMemory(ModSetup.ALLAY_SOURCE_TARET.get());
+        this.brain.eraseMemory(ModSetup.ALLAY_DELIVERY_TARET.get());
+        this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+
+        spawnAtLocation(getItemInHand(InteractionHand.MAIN_HAND));
+        setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
+        setEquipmentSlot(AllayEquipment.MAP, ItemStack.EMPTY);
+        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        return InteractionResult.SUCCESS;
     }
     
     private void setItemInHandSynced(ItemStack stack) {
