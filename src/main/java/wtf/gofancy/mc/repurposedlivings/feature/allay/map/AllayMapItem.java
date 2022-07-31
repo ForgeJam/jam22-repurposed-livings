@@ -1,11 +1,14 @@
 package wtf.gofancy.mc.repurposedlivings.feature.allay.map;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.TooltipFlag;
@@ -14,16 +17,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
-import wtf.gofancy.mc.repurposedlivings.ModSetup;
-import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataCapability;
 import wtf.gofancy.mc.repurposedlivings.Capabilities;
-import wtf.gofancy.mc.repurposedlivings.feature.allay.map.network.UpdateAllayMapDataPacket;
+import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.Network;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataCapability;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.network.UpdateAllayMapDataPacket;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
 import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Contains information about the item source and delivery targets.
@@ -71,11 +75,17 @@ public class AllayMapItem extends MapItem {
                     .withStyle(ChatFormatting.GRAY));
         }
 
-        final var data = level.getCapability(Capabilities.ALLAY_MAP_DATA)
+        final Optional<AllayMapData> dataOpt = level.getCapability(Capabilities.ALLAY_MAP_DATA)
                 .resolve()
                 .orElseThrow()
-                .get(stack)
-                .orElseThrow();
+                .get(stack);
+
+        if (dataOpt.isEmpty()) {
+            // called before update packet arrived - we just return here, it will probably soonish anyway
+            return;
+        }
+
+        final var data = dataOpt.get();
 
         final var source = data.getSource();
         final var destination = data.getDestination();
@@ -160,5 +170,33 @@ public class AllayMapItem extends MapItem {
         }
 
         super.inventoryTick(stack, level, entity, itemSlot, isSelected);
+    }
+
+    @Override
+    public void onCraftedBy(ItemStack stack, Level level, Player player) {
+        if (level.isClientSide) return;
+
+        final CompoundTag nbt = stack.getOrCreateTag();
+
+        if (nbt.contains("map_scale_direction", Tag.TAG_ANY_NUMERIC)) {
+            final int scale = nbt.getInt("map_scale_direction");
+
+            final AllayMapDataCapability dataStorage = level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                    .resolve()
+                    .orElseThrow();
+
+            final AllayMapData currentData = dataStorage.get(stack).orElseThrow();
+            final MapItemSavedData currentMapData = currentData.getCorrespondingMapData(level);
+
+            final int newMapId = level.getFreeMapId();
+
+            level.setMapData(MapItem.makeKey(newMapId), currentMapData.scaled(scale));
+            dataStorage.set(newMapId, currentData.newInstanceFor(newMapId));
+
+            nbt.remove("map_scale_direction");
+            nbt.putInt("map", newMapId);
+        }
+
+        // TODO: map locking support?
     }
 }

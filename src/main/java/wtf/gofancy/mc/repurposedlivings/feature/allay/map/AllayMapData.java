@@ -80,28 +80,24 @@ public class AllayMapData {
 
         final var map = this.getCorrespondingMapData(level);
 
-        if (this.source != null) {
-            map.addDecoration(
-                    MapDecoration.Type.TARGET_POINT,
-                    null,
-                    "source",
-                    source.pos().getX(),
-                    source.pos().getZ(),
-                    0.0,
-                    TranslationUtils.generic("source")
-            );
-        }
-        if (this.destination != null) {
-            map.addDecoration(
-                    MapDecoration.Type.TARGET_X,
-                    null,
-                    "destination",
-                    destination.pos().getX(),
-                    destination.pos().getZ(),
-                    0.0,
-                    TranslationUtils.generic("destination")
-            );
-        }
+        this.getSource().ifPresent(source -> map.addDecoration(
+                MapDecoration.Type.TARGET_POINT,
+                null,
+                "source",
+                source.pos().getX(),
+                source.pos().getZ(),
+                0.0,
+                TranslationUtils.generic("source")
+        ));
+        this.getDestination().ifPresent(destination -> map.addDecoration(
+                MapDecoration.Type.TARGET_X,
+                null,
+                "destination",
+                destination.pos().getX(),
+                destination.pos().getZ(),
+                0.0,
+                TranslationUtils.generic("destination")
+        ));
 
         level.players()
                 .stream()
@@ -113,5 +109,14 @@ public class AllayMapData {
 
     public MapItemSavedData getCorrespondingMapData(final Level level) {
         return level.getMapData(MapItem.makeKey(this.mapId));
+    }
+
+    public AllayMapData newInstanceFor(final int newMapId) {
+        final AllayMapData data = new AllayMapData(newMapId);
+
+        this.getSource().ifPresent(data::setSource);
+        this.getDestination().ifPresent(data::setDestination);
+
+        return data;
     }
 }
