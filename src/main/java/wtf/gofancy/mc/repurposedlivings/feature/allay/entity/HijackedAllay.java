@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -323,7 +324,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
             }
         }
         // Add the remainder to the Allay's hand
-        if (!ItemStack.matches(remainder, itemInHand)) setItemInHandSynced(remainder);
+        if (remainder != itemInHand) setItemInHandSynced(remainder);
     }
 
     /**
@@ -368,6 +369,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
                 0.25,
                 0
             );
+            serverLevel.playSound(null, allay, ModSetup.MIND_CONTROL_DEVICE_DETACH_SOUND.get(), SoundSource.MASTER, 0.5f, 1);
         }
     }
     
@@ -402,6 +404,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
 
         spawnAtLocation(getItemInHand(InteractionHand.MAIN_HAND));
         setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        this.extendedInventory.removeAllItems().forEach(this::spawnAtLocation);
 
         setEquipmentSlot(AllayEquipment.MAP, ItemStack.EMPTY);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);

@@ -62,6 +62,7 @@ public final class ModSetup {
         .build("hijacked_allay"));
 
     public static final RegistryObject<SoundEvent> MIND_CONTROL_DEVICE_ATTACH_SOUND = SOUNDS.register("mind_control_device_attach", () -> new SoundEvent(RepurposedLivings.rl("mind_control_device_attach")));
+    public static final RegistryObject<SoundEvent> MIND_CONTROL_DEVICE_DETACH_SOUND = SOUNDS.register("mind_control_device_detach", () -> new SoundEvent(RepurposedLivings.rl("mind_control_device_detach")));
 
     public static final RegistryObject<EntityDataSerializer<NonNullList<ItemStack>>> ITEM_STACK_LIST_SERIALIZER = ENTITY_DATA_SERIALIZERS.register("item_stack_list", ItemStackListEntityDataSerializer::new);
 

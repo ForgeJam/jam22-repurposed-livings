@@ -34,7 +34,8 @@
 
     "entity.repurposedlivings.hijacked_allay": "Hijacked Allay",
 
-    "sounds.repurposedlivings.mind_control_device_attach": "Mind Control Devide attach",
+    "sounds.repurposedlivings.mind_control_device_attach": "Mind Control Device attach",
+    "sounds.repurposedlivings.mind_control_device_detach": "Mind Control Device detach",
     
     "probe.repurposedlivings.equipment": "Equipment",
     "probe.repurposedlivings.carrying": "Carrying"

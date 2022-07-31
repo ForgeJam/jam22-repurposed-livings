@@ -50,5 +50,7 @@ power of the echo shard, this device is so persuading that no Allay can resist i
 
 ### Credits
 
-- Mind Control Device Sound - [Magical focus energy](https://freesound.org/people/Iridiuss/sounds/519415)
+- Mind Control Device attach sound - [Magical focus energy](https://freesound.org/people/Iridiuss/sounds/519415)
   by Iridiuss
+- Mind Control Device detach sound (edited) - [Magic](https://freesound.org/people/RICHERlandTV/sounds/216089/) by RICHERlandTV
+
