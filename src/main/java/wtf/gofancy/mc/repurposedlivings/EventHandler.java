@@ -3,6 +3,7 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -12,13 +13,63 @@ import net.minecraft.world.item.EmptyMapItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import wtf.gofancy.mc.repurposedlivings.item.AllayMapDraftItem;
+import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataStorageProvider;
+import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataSyncFlagProvider;
+import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
+import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
 import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
+import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 public class EventHandler {
+
+    @SubscribeEvent
+    public void onAttachCapabilities(final AttachCapabilitiesEvent<Level> event) {
+        event.addCapability(
+                RepurposedLivings.rl("allay_map_data"),
+                new AllayMapDataStorageProvider()
+        );
+    }
+
+    @SubscribeEvent
+    public void onAttachPlayerCapabilities(final AttachCapabilitiesEvent<Entity> event) {
+        if (!(event.getObject() instanceof ServerPlayer)) return;
+
+        event.addCapability(
+                RepurposedLivings.rl("allay_map_data_sync_flag"),
+                new AllayMapDataSyncFlagProvider()
+        );
+    }
+
+    @SubscribeEvent
+    public void onPlayerClone(PlayerEvent.Clone event) {
+        if (!event.isWasDeath()) return;
+
+        final var oldPlayer = event.getOriginal();
+        final var newPlayer = event.getEntity();
+
+        oldPlayer.reviveCaps();
+
+        final var oldCap = oldPlayer.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow();
+        final var newCap = newPlayer.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow();
+
+        newCap.deserializeNBT(oldCap.serializeNBT());
+
+        oldPlayer.invalidateCaps();
+    }
+
+    @SubscribeEvent
+    public void onPlayerJoinLevel(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            player.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG).resolve().orElseThrow().invalidateAll();
+        }
+    }
 
     @SubscribeEvent
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
@@ -32,9 +83,18 @@ public class EventHandler {
             Item item = stack.getItem();
 
             if (item instanceof EmptyMapItem) {
-                ItemStack draftStack = AllayMapDraftItem.create(pos, side);
+                ItemStack draftStack = AllayMapItem.create(level, pos.getX(), pos.getZ());
+
+                level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                        .resolve()
+                        .orElseThrow()
+                        .get(draftStack)
+                        .orElseThrow()
+                        .setSource(new ItemTarget(pos, side));
+
                 player.setItemInHand(event.getHand(), draftStack);
-                player.displayClientMessage(ModUtil.getItemTranslation(draftStack.getItem(), "complete_draft").withStyle(ChatFormatting.AQUA), true);
+                player.displayClientMessage(TranslationUtils.message("allay_map_transformed")
+                        .withStyle(ChatFormatting.AQUA), true);
 
                 event.setCancellationResult(InteractionResult.CONSUME);
                 event.setCanceled(true);
@@ -50,7 +110,7 @@ public class EventHandler {
         ItemStack stack = event.getItemStack();
         Entity target = event.getTarget();
         Item item = stack.getItem();
-        
+
         if (item instanceof MindControlDevice controller && target instanceof LivingEntity livingEntity) {
             InteractionResult result = controller.interactLivingEntityFirst(livingEntity, stack);
             if (result != InteractionResult.PASS) {

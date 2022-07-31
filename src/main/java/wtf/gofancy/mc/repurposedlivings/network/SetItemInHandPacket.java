@@ -9,7 +9,7 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public record SetItemInHandPacket(int entityId, ItemStack stack) {
-    
+
     public void encode(FriendlyByteBuf buf) {
         buf.writeInt(this.entityId);
         buf.writeItem(this.stack);
@@ -22,9 +22,11 @@ public record SetItemInHandPacket(int entityId, ItemStack stack) {
     }
 
     public void processClientPacket(Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandler.handleSetItemInHandPacket(this));
-        });
+        ctx.get().enqueueWork(() ->
+                DistExecutor.unsafeRunWhenOn(
+                        Dist.CLIENT,
+                        () -> () -> ClientPacketHandler.handleSetItemInHandPacket(this)
+                ));
         ctx.get().setPacketHandled(true);
     }
 }

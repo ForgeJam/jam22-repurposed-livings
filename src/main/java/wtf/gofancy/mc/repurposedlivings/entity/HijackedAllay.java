@@ -2,6 +2,7 @@ package wtf.gofancy.mc.repurposedlivings.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -11,6 +12,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -33,9 +35,11 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.network.PacketDistributor;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
+import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.network.SetItemInHandPacket;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
+import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.Map;
 import java.util.Optional;
@@ -132,22 +136,42 @@ public class HijackedAllay extends Allay {
 
                 remove(RemovalReason.DISCARDED);
                 this.level.addFreshEntity(allay);
-                serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 0.2, getZ(), 10, 0.25, 0.25, 0.25, 0);
+                serverLevel.sendParticles(
+                        ParticleTypes.HAPPY_VILLAGER,
+                        getX(),
+                        getY() + 0.2,
+                        getZ(),
+                        10,
+                        0.25,
+                        0.25,
+                        0.25,
+                        0
+                );
             }
             return InteractionResult.SUCCESS;
-        }
         // Give the Allay an Allay Map
-        else if (stack.getItem() == ModSetup.ALLAY_MAP.get() && map.isEmpty()) {
-            CompoundTag tag = stack.getTag();
-            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
-            this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), from);
-            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
-            this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), to);
-            this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
-            
-            setEquipmentSlot(AllayEquipment.MAP, stack);
-            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            return InteractionResult.SUCCESS;
+        } else if (stack.is(ModSetup.ALLAY_MAP.get()) && map.isEmpty()) {
+            return player.getCapability(Capabilities.ALLAY_MAP_DATA).resolve()
+                    .flatMap(data -> data.get(stack))
+                    .map(data -> {
+                        if (!data.isComplete()) {
+                            if (player instanceof ServerPlayer serverPlayer) {
+                                serverPlayer.displayClientMessage(TranslationUtils.message("allay_map_incomplete")
+                                        .withStyle(ChatFormatting.RED), true);
+                            }
+                            return InteractionResult.CONSUME;
+                        }
+
+                        this.brain.setMemory(ModSetup.ALLAY_SOURCE_TARET.get(), data.getSource().orElseThrow());
+                        this.brain.setMemory(ModSetup.ALLAY_DELIVERY_TARET.get(), data.getDestination().orElseThrow());
+
+                        this.brain.setActiveActivityIfPossible(ModSetup.ALLAY_TRANSFER_ITEMS.get());
+
+                        setEquipmentSlot(AllayEquipment.MAP, stack);
+                        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+                        return InteractionResult.SUCCESS;
+                    })
+                    .orElseThrow();
         }
         // Take an Allay Map from the Allay
         else if (stack.isEmpty() && !map.isEmpty()) {

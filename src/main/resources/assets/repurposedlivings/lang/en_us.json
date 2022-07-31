@@ -1,36 +1,38 @@
 {
+    "repurposedlivings.source": "source",
+    "repurposedlivings.destination": "destination",
+
     "itemGroup.repurposedlivings": "Repurposed Livings",
-    
+
     "item.repurposedlivings.allay_map": "Allay Map",
-    "item.repurposedlivings.allay_map.invalid": "Invalid",
-    "item.repurposedlivings.allay_map.out_of_range": "Out of Range",
-    "item.repurposedlivings.allay_map.pos": "Pos: [X=%s, Y=%s, Z=%s]",
-    "item.repurposedlivings.allay_map.side": "Side: ",
-    "item.repurposedlivings.allay_map.side.down": "Down",
-    "item.repurposedlivings.allay_map.side.up": "Up",
-    "item.repurposedlivings.allay_map.side.north": "North",
-    "item.repurposedlivings.allay_map.side.south": "South",
-    "item.repurposedlivings.allay_map.side.west": "West",
-    "item.repurposedlivings.allay_map.side.east": "East",
-    "item.repurposedlivings.allay_map_draft": "Allay Map Draft",
-    "item.repurposedlivings.allay_map_draft.complete_draft": "Shift-Click another target to complete",
+
+    "item.repurposedlivings.echo_pearl": "Echo Pearl",
     "item.repurposedlivings.mind_control_device": "Mind Control Device",
     "item.repurposedlivings.echo_mind_control_device": "Echo Mind Control Device",
     "item.repurposedlivings.ender_storage_upgrade": "Ender Storage Upgrade",
-    "item.repurposedlivings.ender_storage_upgrade.description": "Adds 3 extra slots to the Allay's inventory",
     "item.repurposedlivings.ender_speed_upgrade": "Ender Speed Upgrade",
-    "item.repurposedlivings.ender_speed_upgrade.description": "Increases the Allay's speed",
-    "repurposedlivings.target.from": "From: ",
-    "repurposedlivings.target.to": "To: ",
-    
+
+    "item.repurposedlivings.allay_map.tooltip.complete": "Use this map to guide Allays under your control!",
+    "item.repurposedlivings.allay_map.tooltip.incomplete": "Shift-Click other targets to complete this map!",
+    "item.repurposedlivings.allay_map.tooltip.target_source": "Source: ",
+    "item.repurposedlivings.allay_map.tooltip.target_destination": "Destination: ",
+    "item.repurposedlivings.allay_map.tooltip.target_pos": "Pos: [X=%s, Y=%s, Z=%s]",
+    "item.repurposedlivings.allay_map.tooltip.target_side": "Side: ",
+    "item.repurposedlivings.allay_map.tooltip.direction.down": "Down",
+    "item.repurposedlivings.allay_map.tooltip.direction.up": "Up",
+    "item.repurposedlivings.allay_map.tooltip.direction.north": "North",
+    "item.repurposedlivings.allay_map.tooltip.direction.south": "South",
+    "item.repurposedlivings.allay_map.tooltip.direction.west": "West",
+    "item.repurposedlivings.allay_map.tooltip.direction.east": "East",
+
+    "item.repurposedlivings.ender_storage_upgrade.tooltip.description": "Adds 3 extra slots to the Allay's inventory",
+
+    "item.repurposedlivings.ender_speed_upgrade.tooltip.description": "Increases the Allay's speed",
+
+    "message.repurposedlivings.allay_map_transformed": "Shift-Click another target to complete this map",
+    "message.repurposedlivings.allay_map_incomplete": "Map not yet completed",
+
     "entity.repurposedlivings.hijacked_allay": "Hijacked Allay",
-    
-    "sounds.repurposedlivings.mind_control_device_attach": "Mind Control Devide attach",
-    
-    "container.repurposedlivings.allay_map.source_target": "Source Target",
-    "container.repurposedlivings.allay_map.destination_target": "Destination Target",
-    "container.repurposedlivings.allay_map.pos": "Pos:",
-    "container.repurposedlivings.allay_map.pos.x": "X: %s",
-    "container.repurposedlivings.allay_map.pos.y": "Y: %s",
-    "container.repurposedlivings.allay_map.pos.z": "Z: %s"
+
+    "sounds.repurposedlivings.mind_control_device_attach": "Mind Control Devide attach"
 }

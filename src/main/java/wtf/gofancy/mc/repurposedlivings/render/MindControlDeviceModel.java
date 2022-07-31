@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Entity;
 import wtf.gofancy.mc.repurposedlivings.RepurposedLivings;
 
 public class MindControlDeviceModel<T extends Entity> extends EntityModel<T> {
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(RepurposedLivings.MODID, "mind_control_device_model"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(RepurposedLivings.rl("mind_control_device_model"), "main");
     
 	private final ModelPart root;
 

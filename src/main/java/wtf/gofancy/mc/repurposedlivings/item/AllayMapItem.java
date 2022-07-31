@@ -1,109 +1,164 @@
 package wtf.gofancy.mc.repurposedlivings.item;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
-import wtf.gofancy.mc.repurposedlivings.container.AllayMapContainer;
+import wtf.gofancy.mc.repurposedlivings.capabilities.Capabilities;
+import wtf.gofancy.mc.repurposedlivings.network.UpdateAllayMapDataPacket;
+import wtf.gofancy.mc.repurposedlivings.network.Network;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;
+import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Contains information about the item source and delivery targets.
  * Can be given to Hijacked Allays.
  */
-public class AllayMapItem extends Item {
+public class AllayMapItem extends MapItem {
 
     public AllayMapItem() {
         super(new Properties().stacksTo(1));
     }
 
     /**
-     * Complete an Allay Map draft by adding a destination target to it.
-     * 
-     * @param draft the Allay Map draft
-     * @param destPos the destination target position
-     * @param destSide the destination target side
-     * @return the completed Allay Map
+     * Creates a new Allay map by creating and storing its associated {@link MapItemSavedData} and {@link AllayMapData}.
+     *
+     * The map is created without any target points, you need to add them manually afterwards via the level capability
+     * {@link wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataCapability AllayMapDataCapability}.
+     *
+     * @param level the level in which this map is created
+     * @param playerX the X position of the inventory this map will be placed in, used to calculate the map bounds
+     * @param playerZ the Z position of the inventory this map will be placed in, used to calculate the map bounds
+     * @return a new Allay map which is linked to its new map data
      */
-    public static ItemStack createFromDraft(ItemStack draft, BlockPos destPos, Direction destSide) {
-        BlockPos fromPos = ItemTarget.fromNbt(draft.getTag().getCompound("from")).getRelativePos();
-        if (destPos.relative(destSide).closerThan(fromPos, 1)) return ItemStack.EMPTY;
+    public static ItemStack create(Level level, int playerX, int playerZ) {
+        final int mapId = level.getFreeMapId();
 
-        CompoundTag tag = draft.getTag();
-        tag.put("to", new ItemTarget(destPos, destSide).serializeNbt());
-        ItemStack stack = new ItemStack(ModSetup.ALLAY_MAP.get(), 1);
-        stack.setTag(tag);
+        final var mapData = MapItemSavedData.createFresh(playerX, playerZ, (byte) 0, true, true, level.dimension());
+
+        level.setMapData(MapItem.makeKey(mapId), mapData);
+
+        level.getCapability(Capabilities.ALLAY_MAP_DATA).resolve().orElseThrow().set(mapId, new AllayMapData(mapId));
+
+        final ItemStack stack = new ItemStack(ModSetup.ALLAY_MAP.get());
+        stack.getOrCreateTag().putInt("map", mapId);
+
         return stack;
-    }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        if (player instanceof ServerPlayer serverPlayer && ensureTargetsLoaded(level, player, player.getItemInHand(usedHand))) {
-            NetworkHooks.openScreen(serverPlayer, new AllayMapMenuProvider(usedHand), buf -> buf.writeEnum(usedHand));
-        }
-        return super.use(level, player, usedHand);
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
         super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
 
-        CompoundTag tag = stack.getOrCreateTag();
-        if (tag.contains("from") && tag.contains("to")) {
-            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
-            tooltipComponents.add(ModUtil.getTargetTranslation("target.from", from).withStyle(ChatFormatting.DARK_GRAY));
+        if (!isAdvanced.isAdvanced()) {
+            // automatically added by super if advanced
+            tooltipComponents.add(Component.translatable("filled_map.id", MapItem.getMapId(stack))
+                    .withStyle(ChatFormatting.GRAY));
+        }
 
-            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
-            tooltipComponents.add(ModUtil.getTargetTranslation("target.to", to).withStyle(ChatFormatting.DARK_GRAY));
+        final var data = level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                .resolve()
+                .orElseThrow()
+                .get(stack)
+                .orElseThrow();
+
+        final var source = data.getSource();
+        final var destination = data.getDestination();
+
+        if (data.isComplete()) {
+            tooltipComponents.add(TranslationUtils.tooltip(this, "complete").withStyle(ChatFormatting.GOLD));
+        } else {
+            tooltipComponents.add(TranslationUtils.tooltip(this, "incomplete").withStyle(ChatFormatting.AQUA));
         }
-        else {
-            tooltipComponents.add(ModUtil.getItemTranslation(this, "invalid").withStyle(ChatFormatting.DARK_GRAY));
-        }
+        source.ifPresent(target -> tooltipComponents.add(this.composeTargetComponent("source", target)));
+        destination.ifPresent(target -> tooltipComponents.add(this.composeTargetComponent("destination", target)));
     }
 
-    private boolean ensureTargetsLoaded(Level level, Player player, ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag();
-        if (tag.contains("from") && tag.contains("to")) {
-            ItemTarget from = ItemTarget.fromNbt(tag.getCompound("from"));
-            ItemTarget to = ItemTarget.fromNbt(tag.getCompound("to"));
-            
-            boolean loaded = Stream.of(from.pos(), from.getRelativePos(), to.pos(), to.getRelativePos()).allMatch(level::isLoaded);
-            if (!loaded) player.displayClientMessage(ModUtil.getItemTranslation(this, "out_of_range").withStyle(ChatFormatting.RED), true);
-            else return true;
-        }
-        return false;
+    private MutableComponent composeTargetComponent(final String name, final ItemTarget target) {
+        return TranslationUtils.tooltip(this, "target_" + name)
+                .append(TranslationUtils.tooltip(
+                        this,
+                        "target_pos",
+                        target.pos().getX(),
+                        target.pos().getY(),
+                        target.pos().getZ()
+                ))
+                .append(", ")
+                .append(TranslationUtils.tooltip(this, "target_side"))
+                .append(TranslationUtils.tooltip(this, "direction." + target.side().getName()))
+                .withStyle(ChatFormatting.DARK_GRAY);
     }
-    
-    private record AllayMapMenuProvider(InteractionHand hand) implements MenuProvider {
 
-        @Override
-            public Component getDisplayName() {
-                return ModSetup.ALLAY_MAP.get().getDescription();
-            }
-    
-            @Nullable
-            @Override
-            public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
-                return new AllayMapContainer(containerId, this.hand, player);
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        final var level = context.getLevel();
+
+        if (level.isClientSide) return super.useOn(context);
+
+        final var pos = context.getClickedPos();
+        final var side = context.getClickedFace();
+
+        final var data = level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                .resolve()
+                .orElseThrow()
+                .get(context.getItemInHand())
+                .orElseThrow();
+
+        if (data.getSource().isEmpty()) {
+            if (ModUtil.isContainer(level, pos, side)) {
+                data.setSource(new ItemTarget(pos, side));
+                return InteractionResult.SUCCESS;
             }
         }
+        if (data.getDestination().isEmpty()) {
+            if (ModUtil.isContainer(level, pos, side)) {
+                data.setDestination(new ItemTarget(pos, side));
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        return super.useOn(context);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected) {
+        if (entity instanceof ServerPlayer player) {
+            final var data = level.getCapability(Capabilities.ALLAY_MAP_DATA)
+                    .resolve()
+                    .orElseThrow()
+                    .get(stack)
+                    .orElseThrow();
+
+            data.tick(level);
+
+            final var syncFlag = player.getCapability(Capabilities.ALLAY_MAP_DATA_SYNC_FLAG)
+                    .resolve()
+                    .orElseThrow();
+
+            if (syncFlag.requiresSync(data.getMapId())) {
+                Network.INSTANCE.send(
+                        PacketDistributor.PLAYER.with(() -> player),
+                        new UpdateAllayMapDataPacket(data)
+                );
+                syncFlag.setSynced(data.getMapId());
+            }
+        }
+
+        super.inventoryTick(stack, level, entity, itemSlot, isSelected);
+    }
 }

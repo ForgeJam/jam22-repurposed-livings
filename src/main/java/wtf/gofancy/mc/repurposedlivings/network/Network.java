@@ -1,6 +1,5 @@
 package wtf.gofancy.mc.repurposedlivings.network;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -12,7 +11,7 @@ public final class Network {
     private static final String PROTOCOL_VERSION = "1";
 
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(RepurposedLivings.MODID, "main"),
+        RepurposedLivings.rl("main"),
         () -> PROTOCOL_VERSION,
         PROTOCOL_VERSION::equals,
         PROTOCOL_VERSION::equals
@@ -22,11 +21,11 @@ public final class Network {
         int id = 0;
 
         INSTANCE.registerMessage(id++,
-            UpdateAllayMapTarget.class,
-            UpdateAllayMapTarget::encode,
-            UpdateAllayMapTarget::decode,
-            UpdateAllayMapTarget::processServerPacket,
-            Optional.of(NetworkDirection.PLAY_TO_SERVER)
+            UpdateAllayMapDataPacket.class,
+            UpdateAllayMapDataPacket::encode,
+            UpdateAllayMapDataPacket::decode,
+            UpdateAllayMapDataPacket::processClientPacket,
+            Optional.of(NetworkDirection.PLAY_TO_CLIENT)
         );
         INSTANCE.registerMessage(id++,
             SetItemInHandPacket.class,
