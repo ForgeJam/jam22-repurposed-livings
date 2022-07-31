@@ -4,5 +4,11 @@
         "sounds": [
             "repurposedlivings:mind_control_device_attach"
         ]
+    },
+    "mind_control_device_detach": {
+        "subtitle": "sounds.repurposedlivings.mind_control_device_detach",
+        "sounds": [
+            "repurposedlivings:mind_control_device_detach"
+        ]
     }
 }
