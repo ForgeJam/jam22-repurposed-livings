@@ -9,10 +9,9 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
-import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataCapability;
-import wtf.gofancy.mc.repurposedlivings.capabilities.AllayMapDataSyncFlagCapability;
-import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
-import wtf.gofancy.mc.repurposedlivings.network.Network;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataCapability;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataSyncFlagCapability;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
 
 @Mod(RepurposedLivings.MODID)
 public class RepurposedLivings {

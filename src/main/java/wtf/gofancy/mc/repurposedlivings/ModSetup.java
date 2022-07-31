@@ -14,11 +14,11 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import wtf.gofancy.mc.repurposedlivings.entity.HijackedAllay;
-import wtf.gofancy.mc.repurposedlivings.item.AllayMapItem;
-import wtf.gofancy.mc.repurposedlivings.item.EchoMindControlDevice;
-import wtf.gofancy.mc.repurposedlivings.item.ItemWithDescription;
-import wtf.gofancy.mc.repurposedlivings.item.MindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapItem;
+import wtf.gofancy.mc.repurposedlivings.feature.mindcontrol.EchoMindControlDevice;
+import wtf.gofancy.mc.repurposedlivings.util.ItemWithDescription;
+import wtf.gofancy.mc.repurposedlivings.feature.mindcontrol.MindControlDevice;
 import wtf.gofancy.mc.repurposedlivings.util.ItemStackListEntityDataSerializer;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 
