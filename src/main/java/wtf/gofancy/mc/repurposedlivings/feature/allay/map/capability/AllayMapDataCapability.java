@@ -1,10 +1,10 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.map.capability;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability;
 
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraftforge.common.util.INBTSerializable;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.AllayMapData;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapData;
 
 import java.util.Optional;
 

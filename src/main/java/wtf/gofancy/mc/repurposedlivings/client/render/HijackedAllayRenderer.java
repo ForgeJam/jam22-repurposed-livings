@@ -7,8 +7,8 @@ import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.item.Item;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.RepurposedLivings;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.AllayEquipment;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.AllayEquipment;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
 
 public class HijackedAllayRenderer extends AllayRenderer {
     private static final ResourceLocation MIND_CONTROL_DEVICE_TEXTURE = RepurposedLivings.rl( "textures/entity/mind_control_device.png");

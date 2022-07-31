@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.entity;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -12,7 +12,7 @@ import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.entity.animal.allay.AllayAi;
 import net.minecraft.world.entity.schedule.Activity;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.behavior.GoToItemTarget;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.behavior.GoToItemTarget;
 
 public class HijackedAllayAi extends AllayAi {
 

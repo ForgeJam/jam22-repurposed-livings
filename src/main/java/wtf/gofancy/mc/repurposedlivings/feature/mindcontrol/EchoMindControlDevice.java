@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.mindcontrol;
+package wtf.gofancy.mc.repurposedlivings.feature.mindcontrol;
 
 import net.minecraft.world.entity.animal.allay.Allay;
 

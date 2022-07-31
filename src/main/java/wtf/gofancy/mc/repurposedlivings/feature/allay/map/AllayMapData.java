@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.map;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.map;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

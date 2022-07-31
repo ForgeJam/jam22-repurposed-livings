@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.map;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.map;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -15,9 +15,9 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.capability.AllayMapDataCapability;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataCapability;
 import wtf.gofancy.mc.repurposedlivings.Capabilities;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.network.UpdateAllayMapDataPacket;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.network.UpdateAllayMapDataPacket;
 import wtf.gofancy.mc.repurposedlivings.Network;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.ModUtil;

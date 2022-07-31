@@ -3,8 +3,8 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.network.SetItemInHandPacket;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.network.UpdateAllayMapDataPacket;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network.SetItemInHandPacket;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.network.UpdateAllayMapDataPacket;
 
 import java.util.Optional;
 

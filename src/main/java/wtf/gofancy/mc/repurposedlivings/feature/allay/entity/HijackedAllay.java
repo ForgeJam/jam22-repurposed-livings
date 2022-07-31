@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.entity;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
@@ -37,7 +37,7 @@ import net.minecraftforge.network.PacketDistributor;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
 import wtf.gofancy.mc.repurposedlivings.Capabilities;
 import wtf.gofancy.mc.repurposedlivings.Network;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.network.SetItemInHandPacket;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network.SetItemInHandPacket;
 import wtf.gofancy.mc.repurposedlivings.util.ItemTarget;
 import wtf.gofancy.mc.repurposedlivings.util.TranslationUtils;
 

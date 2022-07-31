@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.mindcontrol;
+package wtf.gofancy.mc.repurposedlivings.feature.mindcontrol;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -11,8 +11,8 @@ import net.minecraft.world.entity.animal.allay.Allay;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import wtf.gofancy.mc.repurposedlivings.ModSetup;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.AllayEquipment;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.HijackedAllay;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.AllayEquipment;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.HijackedAllay;
 
 /**
  * Hijacks Allays to enable item transfer functionality.

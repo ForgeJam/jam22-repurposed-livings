@@ -1,9 +1,9 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.map.capability;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.AllayMapData;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapData;
 
 import java.util.HashMap;
 import java.util.Map;

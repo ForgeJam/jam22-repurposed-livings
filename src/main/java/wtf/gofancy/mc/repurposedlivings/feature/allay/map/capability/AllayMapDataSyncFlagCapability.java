@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.map.capability;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability;
 
 import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.util.INBTSerializable;

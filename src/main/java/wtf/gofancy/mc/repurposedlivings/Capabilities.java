@@ -3,8 +3,8 @@ package wtf.gofancy.mc.repurposedlivings;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.capability.AllayMapDataCapability;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.capability.AllayMapDataSyncFlagCapability;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataCapability;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.capability.AllayMapDataSyncFlagCapability;
 
 public class Capabilities {
 

@@ -5,8 +5,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import wtf.gofancy.mc.repurposedlivings.Capabilities;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.AllayMapData;
-import wtf.gofancy.mc.repurposedlivings.features.allay.entity.network.SetItemInHandPacket;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapData;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network.SetItemInHandPacket;
 
 public final class ClientPacketHandler {
 

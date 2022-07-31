@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.entity;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.entity;
 
 /**
  * Equipment slot keys for every item and upgrade that can be given to a hijacked allay

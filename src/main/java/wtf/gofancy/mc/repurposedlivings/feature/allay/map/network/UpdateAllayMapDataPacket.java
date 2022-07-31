@@ -1,11 +1,11 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.map.network;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.map.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import wtf.gofancy.mc.repurposedlivings.client.network.ClientPacketHandler;
-import wtf.gofancy.mc.repurposedlivings.features.allay.map.AllayMapData;
+import wtf.gofancy.mc.repurposedlivings.feature.allay.map.AllayMapData;
 
 import java.util.function.Supplier;
 

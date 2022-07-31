@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.entity.network;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.entity.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;

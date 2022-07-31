@@ -1,4 +1,4 @@
-package wtf.gofancy.mc.repurposedlivings.features.allay.entity.behavior;
+package wtf.gofancy.mc.repurposedlivings.feature.allay.entity.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.BlockPos;
