@@ -323,7 +323,7 @@ public class HijackedAllay extends Allay implements IEntityAdditionalSpawnData {
             }
         }
         // Add the remainder to the Allay's hand
-        setItemInHandSynced(remainder);
+        if (!ItemStack.matches(remainder, itemInHand)) setItemInHandSynced(remainder);
     }
 
     /**
