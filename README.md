@@ -9,10 +9,9 @@ Giving a new purpose to entities (currently only the Allay). A ForgeJam 2022 ent
 - adds a new map-like item, the Allay Map - with this map you can precisely configure a source and a delivery target
   chest, once that is done you can give the map to an Allay under your control and it will happily start fullfilling its
   new purpose, that is **item transportation**
-  - the map supports in hand rendering as well as map duplication and map expansion (both the same recipe as for Vanilla
-    maps)
-  - the Allay Map does currently not support rendering in an item frame and provides currently no integration with
-    Vanilla's cartography table
+  - the map supports in hand rendering as well rendering on an item frame. Additionally, map duplication and map
+    expansion are both supported as well (via the same crafting recipe that is used for Vanilla maps)
+  - the Allay Map provides currently no integration with Vanilla's cartography table
 - adds a small upgrade system which allows you to equip your new little voluntary friends with some belt-chests for
   extra storage capacity and new wings, for an even faster item transfer
 
