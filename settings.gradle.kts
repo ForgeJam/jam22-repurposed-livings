@@ -9,7 +9,16 @@ pluginManagement {
             name = "Parchment"
             url = uri("https://maven.parchmentmc.org")
         }
+        maven {
+            name = "Garden of Fancy"
+            url = uri("https://maven.gofancy.wtf/releases")
+        }
     }
+}
+
+plugins {
+    id("wtf.gofancy.convention.locking") version "0.1.0"
+    id("wtf.gofancy.convention.buildcache") version "0.1.0"
 }
 
 rootProject.name = "repurposed-livings"

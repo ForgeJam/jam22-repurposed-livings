@@ -3,10 +3,21 @@ import java.time.LocalDateTime
 plugins {
     id("net.minecraftforge.gradle") version "5.1.+"
     id("org.parchmentmc.librarian.forgegradle") version "1.+"
+
+    id("wtf.gofancy.convention.publishing")
+    id("org.ajoberstar.reckon") version "0.16.1"
 }
 
 group = "wtf.gofancy.mc"
-version = "1.0-SNAPSHOT"
+
+reckon {
+//    stages("beta", "rc", "final") for now let's use snapshots
+    snapshots()
+
+    // only needed when using Reckon's tasks, used to calculate the name of the tag to create
+    setStageCalc(calcStageFromProp())
+    setScopeCalc(calcScopeFromProp())
+}
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -95,3 +106,13 @@ tasks {
         options.encoding = "UTF-8"
     }
 }
+
+publishing {
+    // the publishing convention plugin will automatically either add the snapshot or the releases repo
+    publications {
+        val default by creating(MavenPublication::class) {
+            from(project.components.getByName("java"))
+        }
+    }
+}
+
