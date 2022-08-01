@@ -1,0 +1,18 @@
+include:
+  - remote: https://gitlab.com/gofancy/pipeline-templates/-/raw/main/templates/job_gradle-defaults.yml
+  - remote: https://gitlab.com/gofancy/pipeline-templates/-/raw/main/templates/job_build.yml
+  - remote: https://gitlab.com/gofancy/pipeline-templates/-/raw/main/templates/job_test.yml
+  - remote: https://gitlab.com/gofancy/pipeline-templates/-/raw/main/templates/job_deploy.yml
+
+build:
+  extends: .build
+  stage: build
+
+# we do not have tests anyways
+#test:
+#    extends: .test
+#    stage: test
+
+deploy:
+  extends: .deploy
+  stage: deploy
