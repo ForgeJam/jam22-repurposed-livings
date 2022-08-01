@@ -6,7 +6,7 @@ include:
 
 workflow:
   rules:
-    - if: $CI_PROJECT_NAMESPACE == gofancy
+    - if: $CI_PROJECT_NAMESPACE == 'gofancy'
 
 build:
   extends: .build
