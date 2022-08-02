@@ -17,7 +17,6 @@ pluginManagement {
 }
 
 plugins {
-    id("wtf.gofancy.convention.locking") version "0.1.0"
     id("wtf.gofancy.convention.buildcache") version "0.1.0"
 }
 
